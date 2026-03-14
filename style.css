@@ -2,13 +2,13 @@
 :root {
     --gold: #d4af37;
     --dark-gold: #996515;
-    --paper-white: rgba(255, 253, 240, 0.88); /* Kesan pudar latar belakang */
+    --paper-white: rgba(255, 253, 240, 0.92); 
     --shadow: rgba(0, 0, 0, 0.2);
 }
 
 * {
     box-sizing: border-box;
-    -webkit-print-color-adjust: exact; /* Memastikan warna dicetak tepat */
+    -webkit-print-color-adjust: exact;
 }
 
 body {
@@ -21,48 +21,12 @@ body {
     align-items: center;
 }
 
-/* --- PANEL KAWALAN (TIDAK DICETAK) --- */
-.control-panel {
-    background: white;
-    padding: 20px;
-    margin: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    max-width: 400px;
-    text-align: center;
-    z-index: 100;
-}
-
-.control-panel h2 { margin-top: 0; color: #2c3e50; }
-
-button {
-    background: var(--gold);
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover { background: var(--dark-gold); }
-button:disabled { background: #ccc; cursor: not-allowed; }
-
-.instructions {
-    text-align: left;
-    font-size: 13px;
-    margin-top: 15px;
-    color: #555;
-}
-
 /* --- REKA BENTUK SIJIL (A4 LANDSCAPE) --- */
 .certificate {
     width: 297mm;
     height: 210mm;
     background-color: #fffdf0;
-    background-image: url('image_24ecda.jpg'); /* Imej latar belakang anda */
+    background-image: url('image_24ecda.jpg');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -72,7 +36,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-/* Overlay Glassmorphism */
 .content-overlay {
     border: 2px solid var(--gold);
     height: 100%;
@@ -93,113 +56,102 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .logo-left, .logo-right {
-    height: 100px;
+    height: 90px;
     width: auto;
     object-fit: contain;
 }
 
 .header-text { flex-grow: 1; }
-
-.institution {
-    font-weight: 600;
-    font-size: 16px;
-    letter-spacing: 2px;
-    margin: 0;
-}
-
-.title {
-    font-family: 'Playfair Display', serif;
-    font-size: 52px;
-    color: var(--dark-gold);
-    margin: 5px 0;
-    text-transform: uppercase;
-}
-
+.institution { font-weight: 600; font-size: 16px; letter-spacing: 2px; margin: 0; }
+.title { font-family: 'Playfair Display', serif; font-size: 50px; color: var(--dark-gold); margin: 5px 0; text-transform: uppercase; }
 .sub-title { font-size: 18px; margin: 0; }
 
 /* --- MAKLUMAT PESERTA --- */
 .participant-name {
     font-family: 'Great Vibes', cursive;
-    font-size: 62px;
+    font-size: 58px;
     color: #1a1a1a;
-    margin-top: 15px;
+    margin-top: 10px;
     margin-bottom: 5px;
     border-bottom: 1.5px solid var(--gold);
     min-width: 600px;
     line-height: 1.2;
 }
 
-.participant-ic {
-    font-size: 18px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 15px;
-}
+.participant-ic { font-size: 18px; font-weight: 600; color: #444; margin-bottom: 10px; }
 
 /* --- INFO PROGRAM --- */
-.program-info {
-    font-size: 17px;
-    line-height: 1.5;
-    margin-bottom: 15px;
-}
-
-.program-name {
-    font-weight: 700;
-    font-size: 24px;
-    color: var(--dark-gold);
-    display: block;
-    margin-top: 5px;
-}
+.program-info { font-size: 16px; line-height: 1.4; margin-bottom: 15px; }
+.program-name { font-weight: 700; font-size: 22px; color: var(--dark-gold); display: block; margin-top: 5px; }
 
 /* --- JADUAL SESI --- */
 .sessions-grid {
-    width: 85%;
+    width: 80%;
     border-collapse: collapse;
-    font-size: 12px;
-    margin-bottom: 20px;
+    font-size: 11px;
+    margin-bottom: 15px;
 }
 
 .sessions-grid td {
     border: 1px solid var(--gold);
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.4);
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.5);
 }
 
-/* --- TANDA TANGAN --- */
+/* --- TANDA TANGAN (HANYA NAZIR) --- */
 .signatures {
     margin-top: auto;
     width: 100%;
     display: flex;
-    justify-content: space-around;
-    padding-bottom: 10px;
+    justify-content: center; /* Letakkan ke tengah */
+    padding-bottom: 15px;
 }
 
-.sig-line {
-    width: 280px;
+.sig-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+}
+
+.signature-img {
+    height: 85px; /* Ketinggian tanda tangan scan */
+    width: auto;
+    position: absolute;
+    bottom: 45px; /* Kedudukan di atas garisan */
+    pointer-events: none;
+    z-index: 5;
+}
+
+.sig-line.single-sig {
+    width: 100%;
     border-top: 2px solid #333;
-    padding-top: 10px;
+    padding-top: 8px;
     font-size: 14px;
     color: #222;
+    text-align: center;
 }
 
-/* --- PENGURUSAN CETAKAN (PRINTING) --- */
+/* --- PENGURUSAN CETAKAN & PREVIEW --- */
 @media print {
     body { background: none; padding: 0; margin: 0; }
-    
-    .no-print { display: none !important; }
-    
+    .no-print, #preview-modal { display: none !important; }
     .certificate {
         margin: 0;
         box-shadow: none;
-        page-break-after: always; /* Paksa setiap sijil ke muka surat baru */
+        border: 10px solid var(--gold); /* Kecilkan sikit border untuk print */
+        page-break-after: always;
     }
+}
 
-    .page-break {
-        display: block;
-        page-break-before: always;
-    }
+/* Penyelarasan Modal Preview di Skrin */
+#preview-modal .certificate {
+    transform: scale(0.8); /* Kecilkan sikit supaya muat skrin laptop */
+    transform-origin: top center;
+    margin-bottom: -100px; /* Adjust ruang balik selepas scale */
 }
