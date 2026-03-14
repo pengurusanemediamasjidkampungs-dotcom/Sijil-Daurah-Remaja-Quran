@@ -7,32 +7,32 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
-        /* Gaya tambahan untuk Menu Pilihan (Hanya muncul di skrin) */
         @media screen {
             .control-panel {
                 position: sticky; top: 0; background: #ffffff; padding: 25px;
                 border-bottom: 4px solid #d4af37; z-index: 1000; width: 100%;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                text-align: center;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;
             }
-            .filter-section { 
-                display: flex; gap: 20px; flex-wrap: wrap; 
-                justify-content: center; margin-bottom: 20px; 
-            }
+            .filter-section { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
             .name-selector { 
                 max-height: 250px; overflow-y: auto; border: 1px solid #ddd; 
                 padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 8px; text-align: left; width: 100%; background: #fdfdfd;
-                border-radius: 8px;
+                gap: 8px; text-align: left; width: 100%; background: #fdfdfd; border-radius: 8px;
             }
-            .name-item { font-size: 13px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-            .name-item:hover { background: #f0f0f0; }
-            .action-btn { 
-                background: #27ae60; color: white; border: none; padding: 12px 30px; 
-                font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer;
-                transition: 0.3s; margin-top: 15px;
+            .name-item { font-size: 13px; display: flex; align-items: center; gap: 10px; }
+            .preview-link { color: #2980b9; cursor: help; text-decoration: underline; font-weight: 600; }
+            
+            /* Modal Preview Styling */
+            #preview-modal {
+                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 2000; overflow-y: auto; padding: 40px 20px;
             }
-            .action-btn:hover { background: #219150; transform: scale(1.02); }
+            .modal-content { background: #fff; margin: auto; padding: 15px; width: fit-content; border-radius: 8px; position: relative; }
+            .close-btn { position: absolute; top: -35px; right: 0; color: white; font-size: 24px; cursor: pointer; font-family: sans-serif; }
+            .preview-tag { background: #d4af37; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; display: inline-block; }
+            
+            .action-btn { background: #27ae60; color: white; border: none; padding: 12px 30px; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; margin-top: 15px; }
+            .action-btn:hover { background: #219150; }
             .btn-small { padding: 5px 10px; font-size: 12px; background: #d4af37; color: white; border: none; border-radius: 3px; cursor: pointer; }
         }
     </style>
@@ -59,12 +59,19 @@
             </div>
         </div>
 
-        <label><strong>3. Pilih Peserta Untuk Dicetak:</strong></label>
-        <div id="name-list" class="name-selector">
-            </div>
+        <label><strong>3. Klik Nama untuk Preview | Tanda untuk Cetak:</strong></label>
+        <div id="name-list" class="name-selector"></div>
 
         <button class="action-btn" onclick="generateAndPrint()">CETAK SIJIL TERPILIH (PDF)</button>
         <p style="font-size: 12px; color: #666;">Status: <span id="status-text">Memuatkan data...</span></p>
+    </div>
+
+    <div id="preview-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePreview()">✕ Tutup Preview</span>
+            <span class="preview-tag">PRATONTON SIJIL</span>
+            <div id="preview-area"></div>
+        </div>
     </div>
 
     <div id="certificate-container"></div>
@@ -72,12 +79,10 @@
     <script>
         let masterData = [];
 
-        // Daftarkan Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
         }
 
-        // Ambil data dari JSON
         async function loadData() {
             try {
                 const res = await fetch('data.json');
@@ -85,11 +90,10 @@
                 renderNameList(masterData);
                 document.getElementById('status-text').innerText = masterData.length + " peserta ditemui.";
             } catch (e) {
-                document.getElementById('status-text').innerText = "Ralat: Fail data.json tidak dijumpai!";
+                document.getElementById('status-text').innerText = "Ralat memuatkan data.json!";
             }
         }
 
-        // Paparkan senarai checkbox nama
         function renderNameList(data) {
             const listDiv = document.getElementById('name-list');
             listDiv.innerHTML = '';
@@ -97,109 +101,93 @@
                 listDiv.innerHTML += `
                     <div class="name-item" data-group="${item.kumpulan}">
                         <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
-                        <label for="user-${index}"><strong>${item.nama}</strong> <br><small>${item.ic}</small></label>
+                        <label for="user-${index}" style="cursor:pointer;">
+                            <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
+                            <br><small>${item.ic}</small>
+                        </label>
                     </div>
                 `;
             });
         }
 
-        // Fungsi Tapis Kumpulan
-        function filterData() {
-            const selectedGroup = document.getElementById('group-filter').value;
-            const items = document.querySelectorAll('.name-item');
-            
-            items.forEach(item => {
-                const itemGroup = item.getAttribute('data-group');
-                if (selectedGroup === "ALL" || itemGroup === selectedGroup) {
-                    item.style.display = "flex";
-                    item.querySelector('input').checked = true;
-                } else {
-                    item.style.display = "none";
-                    item.querySelector('input').checked = false;
-                }
-            });
-        }
-
-        function toggleAll(status) {
-            const checkboxes = document.querySelectorAll('.cert-checkbox');
-            checkboxes.forEach(cb => {
-                if(cb.parentElement.style.display !== "none") cb.checked = status;
-            });
-        }
-
-        // Fungsi Jana Sijil & Cetak
-        function generateAndPrint() {
-            const container = document.getElementById('certificate-container');
-            container.innerHTML = ''; // Reset paparan sebelum ini
-            
-            const selectedCheckboxes = document.querySelectorAll('.cert-checkbox:checked');
-            
-            if (selectedCheckboxes.length === 0) {
-                alert("Sila pilih sekurang-kurangnya satu nama untuk dicetak!");
-                return;
-            }
-
-            selectedCheckboxes.forEach(cb => {
-                const idx = cb.value;
-                const item = masterData[idx];
-                
-                const certHtml = `
-                    <div class="certificate">
-                        <div class="content-overlay">
-                            <div class="header-with-logos">
-                                <img src="logo_masjid.png" alt="Logo Masjid" class="logo-left">
-                                <div class="header-text">
-                                    <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
-                                    <h1 class="title">Sijil Penyertaan</h1>
-                                    <p class="sub-title">Dengan ini diperakukan bahawa</p>
-                                </div>
-                                <img src="logo_daurahquran.png" alt="Logo Program" class="logo-right">
+        // Fungsi bina HTML Sijil (Digunakan oleh Preview & Cetakan)
+        function createCertTemplate(item) {
+            return `
+                <div class="certificate">
+                    <div class="content-overlay">
+                        <div class="header-with-logos">
+                            <img src="logo_masjid.png" class="logo-left">
+                            <div class="header-text">
+                                <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
+                                <h1 class="title">Sijil Penyertaan</h1>
+                                <p class="sub-title">Dengan ini diperakukan bahawa</p>
                             </div>
-
-                            <div class="participant-name">${item.nama}</div>
-                            <div class="participant-ic">No. K/P: ${item.ic}</div>
-                            
-                            <div class="program-info">
-                                Telah berjaya menamatkan 8 sesi intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
-                                <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
-                                Sepanjang Bulan Ramadan 1447H
-                            </div>
-
-                            <table class="sessions-grid">
-                                <tr>
-                                    <td>Sesi 1: 28 Feb (Sab)</td><td>Sesi 2: 1 Mac (Ahad)</td>
-                                    <td>Sesi 3: 7 Mac (Sab)</td><td>Sesi 4: 8 Mac (Ahad)</td>
-                                </tr>
-                                <tr>
-                                    <td>Sesi 5: 14 Mac (Sab)</td><td>Sesi 6: 15 Mac (Ahad)</td>
-                                    <td>Sesi 7: 21 Mac (Sab)</td><td>Sesi 8: 22 Mac (Ahad)</td>
-                                </tr>
-                            </table>
-
-                            <div class="signatures">
-                                <div class="sig-line">
-                                    <strong>PENGERUSI MASJID</strong><br>
-                                    Masjid Kg Sungai Lang Baru
-                                </div>
-                                <div class="sig-line">
-                                    <strong>KETUA MODERATOR</strong><br>
-                                    Daurah Remaja Quran
+                            <img src="logo_daurahquran.png" class="logo-right">
+                        </div>
+                        <div class="participant-name">${item.nama}</div>
+                        <div class="participant-ic">No. K/P: ${item.ic}</div>
+                        <div class="program-info">
+                            Telah berjaya menamatkan 8 sesi intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
+                            <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
+                            Sepanjang Bulan Ramadan 1447H
+                        </div>
+                        <table class="sessions-grid">
+                            <tr><td>Sesi 1: 28 Feb</td><td>Sesi 2: 1 Mac</td><td>Sesi 3: 7 Mac</td><td>Sesi 4: 8 Mac</td></tr>
+                            <tr><td>Sesi 5: 14 Mac</td><td>Sesi 6: 15 Mac</td><td>Sesi 7: 21 Mac</td><td>Sesi 8: 22 Mac</td></tr>
+                        </table>
+                        <div class="signatures">
+                            <div class="sig-wrapper">
+                                <img src="tandatangannazir.png" class="signature-img">
+                                <div class="sig-line single-sig">
+                                    <strong>( NAZIR MASJID )</strong><br>
+                                    Masjid Kampung Sungai Lang Baru
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="page-break"></div>
-                `;
-                container.innerHTML += certHtml;
-            });
-
-            // Beri sedikit masa untuk browser render imej sebelum tetingkap cetak dibuka
-            setTimeout(() => {
-                window.print();
-            }, 800);
+                </div>
+            `;
         }
 
-        // Mula muat data
+        function showPreview(idx) {
+            const area = document.getElementById('preview-area');
+            area.innerHTML = createCertTemplate(masterData[idx]);
+            document.getElementById('preview-modal').style.display = 'block';
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').style.display = 'none';
+        }
+
+        function filterData() {
+            const group = document.getElementById('group-filter').value;
+            document.querySelectorAll('.name-item').forEach(item => {
+                const match = (group === "ALL" || item.getAttribute('data-group') === group);
+                item.style.display = match ? "flex" : "none";
+                item.querySelector('input').checked = match;
+            });
+        }
+
+        function toggleAll(status) {
+            document.querySelectorAll('.cert-checkbox').forEach(cb => {
+                if(cb.parentElement.style.display !== "none") cb.checked = status;
+            });
+        }
+
+        function generateAndPrint() {
+            const container = document.getElementById('certificate-container');
+            container.innerHTML = '';
+            const checked = document.querySelectorAll('.cert-checkbox:checked');
+            
+            if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
+
+            checked.forEach(cb => {
+                container.innerHTML += createCertTemplate(masterData[cb.value]) + '<div class="page-break"></div>';
+            });
+
+            setTimeout(() => { window.print(); }, 800);
+        }
+
         loadData();
     </script>
 </body>
