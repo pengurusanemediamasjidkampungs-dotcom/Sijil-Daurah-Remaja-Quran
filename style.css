@@ -2,13 +2,13 @@
 :root {
     --gold: #d4af37;
     --dark-gold: #996515;
-    --paper-white: rgba(255, 253, 240, 0.94); /* Tekstur kertas premium */
+    --paper-white: rgba(255, 253, 240, 0.94);
     --shadow: rgba(0, 0, 0, 0.2);
 }
 
 * {
     box-sizing: border-box;
-    -webkit-print-color-adjust: exact; /* Memastikan warna dicetak tepat */
+    -webkit-print-color-adjust: exact;
 }
 
 body {
@@ -37,7 +37,6 @@ body {
     overflow: hidden;
 }
 
-/* Overlay Glassmorphism Premium */
 .content-overlay {
     border: 2px solid var(--gold);
     height: 100%;
@@ -62,7 +61,7 @@ body {
 }
 
 .logo-left, .logo-right {
-    height: 140px; /* Diperbesarkan supaya fit dengan ruang  */
+    height: 140px; 
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
@@ -98,7 +97,7 @@ body {
 
 /* --- MAKLUMAT PESERTA (GOOGLE SANS STYLE) --- */
 .participant-name {
-    font-family: 'Open Sans', sans-serif; /* Menggunakan Google Sans style  */
+    font-family: 'Open Sans', sans-serif;
     font-size: 48px; 
     font-weight: 700;
     color: #1a1a1a;
@@ -176,8 +175,6 @@ body {
     bottom: 50px; 
     pointer-events: none;
     z-index: 5;
-    /* Memberikan sedikit kontras pada scan tanda tangan */
-    filter: multiply(1.1);
 }
 
 .sig-line.single-sig {
@@ -191,10 +188,53 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
-/* --- PENGURUSAN CETAKAN & PREVIEW --- */
+/* --- PENYELARASAN MODAL PREVIEW (SANGAT PENTING) --- */
+#preview-modal {
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.9); /* Latar belakang lebih gelap */
+    z-index: 9999; /* Paling atas */
+    overflow-y: auto; 
+    padding: 20px;
+}
+
+.modal-content { 
+    background: #fff; 
+    margin: 20px auto; 
+    padding: 25px; 
+    width: fit-content; 
+    border-radius: 12px; 
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#preview-modal .certificate {
+    transform: scale(0.6); /* Dikecilkan lagi supaya butang cetak muncul di bawah */
+    transform-origin: top center;
+    margin-bottom: -85mm; /* Membuang ruang kosong akibat pengecilan */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.preview-tag {
+    background: var(--gold);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* --- PENGURUSAN CETAKAN --- */
 @media print {
     body { background: none; padding: 0; margin: 0; }
-    .no-print, #preview-modal { display: none !important; }
+    .no-print, #preview-modal, .close-btn { display: none !important; }
     .certificate {
         margin: 0;
         box-shadow: none;
@@ -202,11 +242,4 @@ body {
         page-break-after: always;
     }
     .page-break { display: block; page-break-before: always; }
-}
-
-/* Penyelarasan Modal Preview */
-#preview-modal .certificate {
-    transform: scale(0.75); /* Dikecilkan sedikit untuk paparan skrin */
-    transform-origin: top center;
-    margin-bottom: -150px; 
 }
