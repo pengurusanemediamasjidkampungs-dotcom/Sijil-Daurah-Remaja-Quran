@@ -3,112 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penjana Sijil Daurah Remaja Quran 2026</title>
+    <title>Sistem Cetakan Sijil Daurah 2026</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        /* Gaya tambahan untuk Menu Pilihan (Hanya muncul di skrin) */
+        @media screen {
+            .control-panel {
+                position: sticky; top: 0; background: #ffffff; padding: 25px;
+                border-bottom: 4px solid #d4af37; z-index: 1000; width: 100%;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                text-align: center;
+            }
+            .filter-section { 
+                display: flex; gap: 20px; flex-wrap: wrap; 
+                justify-content: center; margin-bottom: 20px; 
+            }
+            .name-selector { 
+                max-height: 250px; overflow-y: auto; border: 1px solid #ddd; 
+                padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 8px; text-align: left; width: 100%; background: #fdfdfd;
+                border-radius: 8px;
+            }
+            .name-item { font-size: 13px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+            .name-item:hover { background: #f0f0f0; }
+            .action-btn { 
+                background: #27ae60; color: white; border: none; padding: 12px 30px; 
+                font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer;
+                transition: 0.3s; margin-top: 15px;
+            }
+            .action-btn:hover { background: #219150; transform: scale(1.02); }
+            .btn-small { padding: 5px 10px; font-size: 12px; background: #d4af37; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        }
+    </style>
 </head>
 <body>
 
     <div class="no-print control-panel">
-        <h2>Sistem Penjana Sijil</h2>
-        <p>Status: <span id="status-text">Memuatkan data...</span></p>
-        <button onclick="window.print()" id="print-btn" disabled>Cetak Semua Sijil (PDF)</button>
-        <div class="instructions">
-            <strong>Cara Cetak:</strong>
-            <ol>
-                <li>Pilih "Save as PDF" atau Printer anda.</li>
-                <li>Layout: <strong>Landscape</strong>.</li>
-                <li>Paper Size: <strong>A4</strong>.</li>
-                <li>Penting: Aktifkan <strong>Background Graphics</strong> di bahagian "More Settings".</li>
-            </ol>
+        <h2 style="margin-top:0;">Sistem Pengurusan Sijil Daurah</h2>
+        
+        <div class="filter-section">
+            <div>
+                <label><strong>1. Tapis Kumpulan:</strong></label><br>
+                <select id="group-filter" onchange="filterData()" style="padding: 8px; border-radius: 5px; width: 250px;">
+                    <option value="ALL">SEMUA KUMPULAN</option>
+                    <option value="DAURAH QURAN USTAZ NUAIM">USTAZ NUAIM</option>
+                    <option value="DAURAH QURAN USTAZ ARIF">USTAZ ARIF</option>
+                    <option value="DAURAH QURAN USTAZ AIMAN">USTAZ AIMAN</option>
+                </select>
+            </div>
+            <div>
+                <label><strong>2. Pilihan Cepat:</strong></label><br>
+                <button class="btn-small" onclick="toggleAll(true)">Pilih Semua</button>
+                <button class="btn-small" onclick="toggleAll(false)" style="background:#888;">Kosongkan</button>
+            </div>
         </div>
+
+        <label><strong>3. Pilih Peserta Untuk Dicetak:</strong></label>
+        <div id="name-list" class="name-selector">
+            </div>
+
+        <button class="action-btn" onclick="generateAndPrint()">CETAK SIJIL TERPILIH (PDF)</button>
+        <p style="font-size: 12px; color: #666;">Status: <span id="status-text">Memuatkan data...</span></p>
     </div>
 
     <div id="certificate-container"></div>
 
     <script>
-        // Pendaftaran Service Worker (sw.js) untuk fungsi offline
+        let masterData = [];
+
+        // Daftarkan Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log("Service Worker Berdaftar"))
-                .catch(err => console.log("Ralat SW:", err));
+            navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
         }
 
-        // Fungsi utama menarik data dan menjana sijil
-        async function generateCertificates() {
+        // Ambil data dari JSON
+        async function loadData() {
             try {
-                const response = await fetch('data.json');
-                const data = await response.json();
-                const container = document.getElementById('certificate-container');
-                const statusText = document.getElementById('status-text');
-                const printBtn = document.getElementById('print-btn');
-
-                data.forEach((item, index) => {
-                    const certHtml = `
-                        <div class="certificate">
-                            <div class="content-overlay">
-                                <div class="header-with-logos">
-                                    <img src="logo_masjid.png" alt="Logo Masjid" class="logo-left">
-                                    <div class="header-text">
-                                        <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
-                                        <h1 class="title">Sijil Penyertaan</h1>
-                                        <p class="sub-title">Dengan ini diperakukan bahawa</p>
-                                    </div>
-                                    <img src="logo_daurahquran.png" alt="Logo Program" class="logo-right">
-                                </div>
-
-                                <div class="participant-name">${item.nama}</div>
-                                <div class="participant-ic">No. K/P: ${item.ic}</div>
-                                
-                                <div class="program-info">
-                                    Telah berjaya menamatkan 8 sesi intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
-                                    <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
-                                    Sepanjang Bulan Ramadan 1447H
-                                </div>
-
-                                <table class="sessions-grid">
-                                    <tr>
-                                        <td>Sesi 1: 28 Feb (Sab)</td>
-                                        <td>Sesi 2: 1 Mac (Ahad)</td>
-                                        <td>Sesi 3: 7 Mac (Sab)</td>
-                                        <td>Sesi 4: 8 Mac (Ahad)</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sesi 5: 14 Mac (Sab)</td>
-                                        <td>Sesi 6: 15 Mac (Ahad)</td>
-                                        <td>Sesi 7: 21 Mac (Sab)</td>
-                                        <td>Sesi 8: 22 Mac (Ahad)</td>
-                                    </tr>
-                                </table>
-
-                                <div class="signatures">
-                                    <div class="sig-line">
-                                        <strong>PENGERUSI MASJID</strong><br>
-                                        Masjid Kg Sungai Lang Baru
-                                    </div>
-                                    <div class="sig-line">
-                                        <strong>KETUA MODERATOR</strong><br>
-                                        Daurah Remaja Quran
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="page-break"></div>
-                    `;
-                    container.innerHTML += certHtml;
-                });
-
-                statusText.innerText = `${data.length} sijil sedia untuk dicetak.`;
-                printBtn.disabled = false;
-
-            } catch (error) {
-                console.error('Ralat:', error);
-                document.getElementById('status-text').innerText = "Ralat memuatkan fail data.json.";
+                const res = await fetch('data.json');
+                masterData = await res.json();
+                renderNameList(masterData);
+                document.getElementById('status-text').innerText = masterData.length + " peserta ditemui.";
+            } catch (e) {
+                document.getElementById('status-text').innerText = "Ralat: Fail data.json tidak dijumpai!";
             }
         }
 
-        // Jalankan fungsi penjanaan
-        generateCertificates();
+        // Paparkan senarai checkbox nama
+        function renderNameList(data) {
+            const listDiv = document.getElementById('name-list');
+            listDiv.innerHTML = '';
+            data.forEach((item, index) => {
+                listDiv.innerHTML += `
+                    <div class="name-item" data-group="${item.kumpulan}">
+                        <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
+                        <label for="user-${index}"><strong>${item.nama}</strong> <br><small>${item.ic}</small></label>
+                    </div>
+                `;
+            });
+        }
+
+        // Fungsi Tapis Kumpulan
+        function filterData() {
+            const selectedGroup = document.getElementById('group-filter').value;
+            const items = document.querySelectorAll('.name-item');
+            
+            items.forEach(item => {
+                const itemGroup = item.getAttribute('data-group');
+                if (selectedGroup === "ALL" || itemGroup === selectedGroup) {
+                    item.style.display = "flex";
+                    item.querySelector('input').checked = true;
+                } else {
+                    item.style.display = "none";
+                    item.querySelector('input').checked = false;
+                }
+            });
+        }
+
+        function toggleAll(status) {
+            const checkboxes = document.querySelectorAll('.cert-checkbox');
+            checkboxes.forEach(cb => {
+                if(cb.parentElement.style.display !== "none") cb.checked = status;
+            });
+        }
+
+        // Fungsi Jana Sijil & Cetak
+        function generateAndPrint() {
+            const container = document.getElementById('certificate-container');
+            container.innerHTML = ''; // Reset paparan sebelum ini
+            
+            const selectedCheckboxes = document.querySelectorAll('.cert-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                alert("Sila pilih sekurang-kurangnya satu nama untuk dicetak!");
+                return;
+            }
+
+            selectedCheckboxes.forEach(cb => {
+                const idx = cb.value;
+                const item = masterData[idx];
+                
+                const certHtml = `
+                    <div class="certificate">
+                        <div class="content-overlay">
+                            <div class="header-with-logos">
+                                <img src="logo_masjid.png" alt="Logo Masjid" class="logo-left">
+                                <div class="header-text">
+                                    <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
+                                    <h1 class="title">Sijil Penyertaan</h1>
+                                    <p class="sub-title">Dengan ini diperakukan bahawa</p>
+                                </div>
+                                <img src="logo_daurahquran.png" alt="Logo Program" class="logo-right">
+                            </div>
+
+                            <div class="participant-name">${item.nama}</div>
+                            <div class="participant-ic">No. K/P: ${item.ic}</div>
+                            
+                            <div class="program-info">
+                                Telah berjaya menamatkan 8 sesi intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
+                                <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
+                                Sepanjang Bulan Ramadan 1447H
+                            </div>
+
+                            <table class="sessions-grid">
+                                <tr>
+                                    <td>Sesi 1: 28 Feb (Sab)</td><td>Sesi 2: 1 Mac (Ahad)</td>
+                                    <td>Sesi 3: 7 Mac (Sab)</td><td>Sesi 4: 8 Mac (Ahad)</td>
+                                </tr>
+                                <tr>
+                                    <td>Sesi 5: 14 Mac (Sab)</td><td>Sesi 6: 15 Mac (Ahad)</td>
+                                    <td>Sesi 7: 21 Mac (Sab)</td><td>Sesi 8: 22 Mac (Ahad)</td>
+                                </tr>
+                            </table>
+
+                            <div class="signatures">
+                                <div class="sig-line">
+                                    <strong>PENGERUSI MASJID</strong><br>
+                                    Masjid Kg Sungai Lang Baru
+                                </div>
+                                <div class="sig-line">
+                                    <strong>KETUA MODERATOR</strong><br>
+                                    Daurah Remaja Quran
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-break"></div>
+                `;
+                container.innerHTML += certHtml;
+            });
+
+            // Beri sedikit masa untuk browser render imej sebelum tetingkap cetak dibuka
+            setTimeout(() => {
+                window.print();
+            }, 800);
+        }
+
+        // Mula muat data
+        loadData();
     </script>
 </body>
 </html>
