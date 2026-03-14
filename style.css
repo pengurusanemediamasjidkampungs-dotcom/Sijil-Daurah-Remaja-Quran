@@ -9,6 +9,7 @@
 * {
     box-sizing: border-box;
     -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
 body {
@@ -95,7 +96,7 @@ body {
     margin: 0; 
 }
 
-/* --- MAKLUMAT PESERTA (GOOGLE SANS STYLE) --- */
+/* --- MAKLUMAT PESERTA --- */
 .participant-name {
     font-family: 'Open Sans', sans-serif;
     font-size: 48px; 
@@ -151,7 +152,7 @@ body {
     font-weight: 600;
 }
 
-/* --- TANDA TANGAN (CENTERED) --- */
+/* --- TANDA TANGAN --- */
 .signatures {
     margin-top: auto;
     width: 100%;
@@ -188,7 +189,7 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
-/* --- PENYELARASAN MODAL PREVIEW (SANGAT PENTING) --- */
+/* --- PENYELARASAN MODAL PREVIEW --- */
 #preview-modal {
     display: none; 
     position: fixed; 
@@ -196,8 +197,8 @@ body {
     left: 0; 
     width: 100%; 
     height: 100%;
-    background: rgba(0,0,0,0.9); /* Latar belakang lebih gelap */
-    z-index: 9999; /* Paling atas */
+    background: rgba(0,0,0,0.9);
+    z-index: 9999; 
     overflow-y: auto; 
     padding: 20px;
 }
@@ -215,10 +216,11 @@ body {
     align-items: center;
 }
 
-#preview-modal .certificate {
-    transform: scale(0.6); /* Dikecilkan lagi supaya butang cetak muncul di bawah */
+/* Skala sijil dalam modal supaya muat di skrin laptop */
+#preview-area .certificate {
+    transform: scale(0.5);
     transform-origin: top center;
-    margin-bottom: -85mm; /* Membuang ruang kosong akibat pengecilan */
+    margin-bottom: -105mm; /* Tarik elemen bawah naik ke atas selepas scale */
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
@@ -231,15 +233,46 @@ body {
     margin-bottom: 15px;
 }
 
-/* --- PENGURUSAN CETAKAN --- */
+/* --- LOGIK CETAKAN (PENTING) --- */
 @media print {
-    body { background: none; padding: 0; margin: 0; }
-    .no-print, #preview-modal, .close-btn { display: none !important; }
-    .certificate {
-        margin: 0;
-        box-shadow: none;
-        border: 10px solid var(--gold);
-        page-break-after: always;
+    /* 1. Sembunyikan elemen yang tidak perlu */
+    body { 
+        background: white !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
     }
-    .page-break { display: block; page-break-before: always; }
+    
+    .no-print, 
+    .control-panel, 
+    #preview-modal, 
+    .close-btn, 
+    .preview-tag, 
+    .preview-footer { 
+        display: none !important; 
+    }
+
+    /* 2. Pastikan hanya bekas sijil sahaja yang muncul */
+    #certificate-container {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 3. Tetapan setiap keping sijil */
+    .certificate {
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: 12px solid var(--gold) !important; /* Kekalkan border emas */
+        page-break-after: always !important; /* Sijil seterusnya di page baru */
+        page-break-inside: avoid !important;
+        width: 297mm;
+        height: 210mm;
+    }
+
+    /* Pastikan pemisah muka surat berfungsi secara paksa */
+    .page-break { 
+        display: block; 
+        page-break-before: always !important; 
+    }
 }
