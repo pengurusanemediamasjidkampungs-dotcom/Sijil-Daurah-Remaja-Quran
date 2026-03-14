@@ -97,26 +97,43 @@ function showPreview(idx) {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 5. Cetak Sijil Tunggal dari Preview
+// 5. Cetak Sijil Tunggal dari Preview (KEMASKINI: Pembersihan Container)
 function printSingleCert(idx) {
     const container = document.getElementById('certificate-container');
+    
+    // PENTING: Kosongkan container dahulu supaya tidak bercampur dengan data lama
+    container.innerHTML = ''; 
+    
+    // Masukkan template sijil yang dipilih
     container.innerHTML = createCertTemplate(masterData[idx]);
     
+    // Beri sedikit masa untuk pelayar render imej/background sebelum dialog print keluar
     setTimeout(() => {
         window.print();
+        // Selepas selesai print/cancel, kosongkan semula container untuk elak frame kosong tertinggal
+        container.innerHTML = '';
     }, 500);
 }
 
-// 6. Cetak Pukal (Bulk Print)
+// 6. Cetak Pukal / Bulk Print (KEMASKINI: Logik Page Break & Pembersihan)
 function generateAndPrint() {
     const container = document.getElementById('certificate-container');
-    container.innerHTML = '';
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
-    checked.forEach(cb => {
-        container.innerHTML += createCertTemplate(masterData[cb.value]) + '<div class="page-break"></div>';
+    // Kosongkan container sebelum mula menjana yang baru
+    container.innerHTML = '';
+
+    checked.forEach((cb, index) => {
+        const idx = cb.value;
+        // Tambah sijil ke dalam container
+        container.innerHTML += createCertTemplate(masterData[idx]);
+        
+        // Tambah page-break jika bukan sijil terakhir (supaya tidak ada page kosong di hujung)
+        if (index < checked.length - 1) {
+            container.innerHTML += '<div class="page-break"></div>';
+        }
     });
 
     document.getElementById('status-text').innerText = "Menyediakan dokumen cetakan...";
@@ -124,7 +141,9 @@ function generateAndPrint() {
     setTimeout(() => { 
         window.print(); 
         document.getElementById('status-text').innerText = "Cetakan selesai.";
-    }, 800);
+        // Kosongkan container selepas selesai cetak
+        container.innerHTML = '';
+    }, 1000);
 }
 
 // 7. Tutup Modal
