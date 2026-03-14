@@ -3,55 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sijil Daurah Remaja Quran 2026</title>
+    <title>Penjana Sijil Daurah Remaja Quran 2026</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&family=Great+Vibes&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="certificate">
-        <div class="content-overlay">
-            <div class="header">
-                <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
-                <h1 class="title">Sijil Penyertaan</h1>
-                <p>Dengan ini diperakukan bahawa</p>
-            </div>
-
-            <div class="participant-name">Nama Peserta Akan Datang</div>
-            
-            <div class="program-info">
-                Telah berjaya menamatkan 8 sesi intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
-                <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
-                Sepanjang Bulan Ramadan 1447H
-            </div>
-
-            <table class="sessions-grid">
-                <tr>
-                    <td>Sesi 1: 28 Feb</td>
-                    <td>Sesi 2: 1 Mac</td>
-                    <td>Sesi 3: 7 Mac</td>
-                    <td>Sesi 4: 8 Mac</td>
-                </tr>
-                <tr>
-                    <td>Sesi 5: 14 Mac</td>
-                    <td>Sesi 6: 15 Mac</td>
-                    <td>Sesi 7: 21 Mac</td>
-                    <td>Sesi 8: 22 Mac</td>
-                </tr>
-            </table>
-
-            <div class="signatures">
-                <div class="sig-line">
-                    <strong>PENGERUSI MASJID</strong><br>
-                    Masjid Kg Sungai Lang Baru
-                </div>
-                <div class="sig-line">
-                    <strong>KETUA MODERATOR</strong><br>
-                    Daurah Remaja Quran
-                </div>
-            </div>
+    <div class="no-print control-panel">
+        <h2>Sistem Penjana Sijil</h2>
+        <p>Status: <span id="status-text">Memuatkan data...</span></p>
+        <button onclick="window.print()" id="print-btn" disabled>Cetak Semua Sijil (PDF)</button>
+        <div class="instructions">
+            <strong>Cara Cetak:</strong>
+            <ol>
+                <li>Pilih "Save as PDF" atau Printer anda.</li>
+                <li>Layout: <strong>Landscape</strong>.</li>
+                <li>Paper Size: <strong>A4</strong>.</li>
+                <li>Penting: Aktifkan <strong>Background Graphics</strong> di bahagian "More Settings".</li>
+            </ol>
         </div>
     </div>
 
+    <div id="certificate-container"></div>
+
+    <script>
+        // Pendaftaran Service Worker (sw.js) untuk fungsi offline
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Service Worker Berdaftar"))
+                .catch(err => console.log("Ralat SW:", err));
+        }
+
+        // Fungsi utama menarik data dan menjana sijil
+        async function generateCertificates() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+                const container = document.getElementById('certificate-container');
+                const statusText = document.getElementById('status-text');
+                const printBtn = document.getElementById('print-btn');
+
+                data.forEach((item, index) => {
+                    const certHtml = `
+                        <div class="certificate">
+                            <div class="content-overlay">
+                                <div class="header-with-logos">
+                                    <img src="logo_masjid.png" alt="Logo Masjid" class="logo-left">
+                                    <div class="header-text">
+                                        <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
+                                        <h1 class="title">Sijil Penyertaan</h1>
+                                        <p class="sub-title">Dengan ini diperakukan bahawa</p>
+                                    </div>
+                                    <img src="logo_daurahquran.png" alt="Logo Program" class="logo-right">
+                                </div>
+
+                                <div class="participant-name">${item.nama}</div>
+                                <div class="participant-ic">No. K/P: ${item.ic}</div>
+                                
+                                <div class="program-info">
+                                    Telah berjaya menamatkan 8 sesi intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
+                                    <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
+                                    Sepanjang Bulan Ramadan 1447H
+                                </div>
+
+                                <table class="sessions-grid">
+                                    <tr>
+                                        <td>Sesi 1: 28 Feb (Sab)</td>
+                                        <td>Sesi 2: 1 Mac (Ahad)</td>
+                                        <td>Sesi 3: 7 Mac (Sab)</td>
+                                        <td>Sesi 4: 8 Mac (Ahad)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sesi 5: 14 Mac (Sab)</td>
+                                        <td>Sesi 6: 15 Mac (Ahad)</td>
+                                        <td>Sesi 7: 21 Mac (Sab)</td>
+                                        <td>Sesi 8: 22 Mac (Ahad)</td>
+                                    </tr>
+                                </table>
+
+                                <div class="signatures">
+                                    <div class="sig-line">
+                                        <strong>PENGERUSI MASJID</strong><br>
+                                        Masjid Kg Sungai Lang Baru
+                                    </div>
+                                    <div class="sig-line">
+                                        <strong>KETUA MODERATOR</strong><br>
+                                        Daurah Remaja Quran
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-break"></div>
+                    `;
+                    container.innerHTML += certHtml;
+                });
+
+                statusText.innerText = `${data.length} sijil sedia untuk dicetak.`;
+                printBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Ralat:', error);
+                document.getElementById('status-text').innerText = "Ralat memuatkan fail data.json.";
+            }
+        }
+
+        // Jalankan fungsi penjanaan
+        generateCertificates();
+    </script>
 </body>
 </html>
