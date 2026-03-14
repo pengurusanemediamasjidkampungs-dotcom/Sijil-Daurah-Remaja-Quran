@@ -2,20 +2,20 @@
 :root {
     --gold: #d4af37;
     --dark-gold: #996515;
-    --paper-white: rgba(255, 253, 240, 0.92); 
+    --paper-white: rgba(255, 253, 240, 0.94); /* Tekstur kertas premium */
     --shadow: rgba(0, 0, 0, 0.2);
 }
 
 * {
     box-sizing: border-box;
-    -webkit-print-color-adjust: exact;
+    -webkit-print-color-adjust: exact; /* Memastikan warna dicetak tepat */
 }
 
 body {
     background-color: #2c3e50;
     margin: 0;
     padding: 0;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Open Sans', 'Montserrat', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -30,23 +30,25 @@ body {
     background-size: cover;
     background-position: center;
     position: relative;
-    padding: 25px;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin-bottom: 25px;
     border: 12px solid var(--gold);
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
 }
 
+/* Overlay Glassmorphism Premium */
 .content-overlay {
     border: 2px solid var(--gold);
     height: 100%;
     width: 100%;
     background: var(--paper-white);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px;
+    padding: 35px;
     text-align: center;
 }
 
@@ -60,55 +62,103 @@ body {
 }
 
 .logo-left, .logo-right {
-    height: 90px;
+    height: 140px; /* Diperbesarkan supaya fit dengan ruang  */
     width: auto;
     object-fit: contain;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
 }
 
-.header-text { flex-grow: 1; }
-.institution { font-weight: 600; font-size: 16px; letter-spacing: 2px; margin: 0; }
-.title { font-family: 'Playfair Display', serif; font-size: 50px; color: var(--dark-gold); margin: 5px 0; text-transform: uppercase; }
-.sub-title { font-size: 18px; margin: 0; }
+.header-text { 
+    flex-grow: 1; 
+    padding: 0 15px;
+}
 
-/* --- MAKLUMAT PESERTA --- */
-.participant-name {
-    font-family: 'Great Vibes', cursive;
-    font-size: 58px;
+.institution { 
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 700; 
+    font-size: 18px; 
+    letter-spacing: 2px; 
+    margin: 0;
     color: #1a1a1a;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    border-bottom: 1.5px solid var(--gold);
-    min-width: 600px;
-    line-height: 1.2;
 }
 
-.participant-ic { font-size: 18px; font-weight: 600; color: #444; margin-bottom: 10px; }
+.title { 
+    font-family: 'Playfair Display', serif; 
+    font-size: 52px; 
+    color: var(--dark-gold); 
+    margin: 8px 0; 
+    text-transform: uppercase; 
+}
+
+.sub-title { 
+    font-family: 'Open Sans', sans-serif;
+    font-size: 18px; 
+    margin: 0; 
+}
+
+/* --- MAKLUMAT PESERTA (GOOGLE SANS STYLE) --- */
+.participant-name {
+    font-family: 'Open Sans', sans-serif; /* Menggunakan Google Sans style  */
+    font-size: 48px; 
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    border-bottom: 2.5px solid var(--gold);
+    min-width: 700px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.participant-ic { 
+    font-family: 'Open Sans', sans-serif;
+    font-size: 19px; 
+    font-weight: 600; 
+    color: #333; 
+    margin-bottom: 12px; 
+}
 
 /* --- INFO PROGRAM --- */
-.program-info { font-size: 16px; line-height: 1.4; margin-bottom: 15px; }
-.program-name { font-weight: 700; font-size: 22px; color: var(--dark-gold); display: block; margin-top: 5px; }
+.program-info { 
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px; 
+    line-height: 1.5; 
+    margin-bottom: 15px; 
+}
+
+.program-name { 
+    font-weight: 700; 
+    font-size: 24px; 
+    color: var(--dark-gold); 
+    display: block; 
+    margin-top: 5px; 
+    letter-spacing: 1px;
+}
 
 /* --- JADUAL SESI --- */
 .sessions-grid {
-    width: 80%;
+    width: 85%;
     border-collapse: collapse;
-    font-size: 11px;
-    margin-bottom: 15px;
+    font-size: 12px;
+    margin-bottom: 20px;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .sessions-grid td {
     border: 1px solid var(--gold);
-    padding: 6px;
-    background: rgba(255, 255, 255, 0.5);
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
 }
 
-/* --- TANDA TANGAN (HANYA NAZIR) --- */
+/* --- TANDA TANGAN (CENTERED) --- */
 .signatures {
     margin-top: auto;
     width: 100%;
     display: flex;
-    justify-content: center; /* Letakkan ke tengah */
-    padding-bottom: 15px;
+    justify-content: center; 
+    padding-bottom: 10px;
 }
 
 .sig-wrapper {
@@ -116,25 +166,29 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 350px;
+    width: 380px;
 }
 
 .signature-img {
-    height: 85px; /* Ketinggian tanda tangan scan */
+    height: 95px; 
     width: auto;
     position: absolute;
-    bottom: 45px; /* Kedudukan di atas garisan */
+    bottom: 50px; 
     pointer-events: none;
     z-index: 5;
+    /* Memberikan sedikit kontras pada scan tanda tangan */
+    filter: multiply(1.1);
 }
 
 .sig-line.single-sig {
     width: 100%;
     border-top: 2px solid #333;
-    padding-top: 8px;
-    font-size: 14px;
-    color: #222;
+    padding-top: 10px;
+    font-size: 15px;
+    color: #1a1a1a;
     text-align: center;
+    line-height: 1.4;
+    font-family: 'Open Sans', sans-serif;
 }
 
 /* --- PENGURUSAN CETAKAN & PREVIEW --- */
@@ -144,14 +198,15 @@ body {
     .certificate {
         margin: 0;
         box-shadow: none;
-        border: 10px solid var(--gold); /* Kecilkan sikit border untuk print */
+        border: 10px solid var(--gold);
         page-break-after: always;
     }
+    .page-break { display: block; page-break-before: always; }
 }
 
-/* Penyelarasan Modal Preview di Skrin */
+/* Penyelarasan Modal Preview */
 #preview-modal .certificate {
-    transform: scale(0.8); /* Kecilkan sikit supaya muat skrin laptop */
+    transform: scale(0.75); /* Dikecilkan sedikit untuk paparan skrin */
     transform-origin: top center;
-    margin-bottom: -100px; /* Adjust ruang balik selepas scale */
+    margin-bottom: -150px; 
 }
