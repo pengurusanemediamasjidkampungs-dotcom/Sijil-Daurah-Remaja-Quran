@@ -1,0 +1,121 @@
+/* Variable Warna */
+:root {
+    --gold: #d4af37;
+    --dark-gold: #996515;
+    --paper-white: rgba(255, 253, 240, 0.85);
+}
+
+body {
+    background-color: #2c3e50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Saiz A4 Landscape */
+.certificate {
+    width: 297mm;
+    height: 210mm;
+    background: #fffdf0;
+    position: relative;
+    padding: 30px;
+    box-sizing: border-box;
+    border: 12px solid var(--gold);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    
+    /* Letakkan link gambar emas anda di sini */
+    background-image: url('image_24ecda.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.content-overlay {
+    border: 2px solid var(--gold);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    
+    /* Kesan Glassmorphism */
+    background: var(--paper-white);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.institution {
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 0;
+}
+
+.title {
+    font-family: 'Playfair Display', serif;
+    font-size: 55px;
+    color: var(--dark-gold);
+    margin: 5px 0;
+    text-transform: uppercase;
+}
+
+.participant-name {
+    font-family: 'Great Vibes', cursive;
+    font-size: 65px;
+    color: #1a1a1a;
+    margin: 15px 0;
+    padding: 0 50px;
+    border-bottom: 1px solid var(--gold);
+}
+
+.program-info {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.program-name {
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--dark-gold);
+}
+
+.sessions-grid {
+    margin-top: 15px;
+    width: 85%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.sessions-grid td {
+    border: 1px solid var(--gold);
+    padding: 10px;
+    background: rgba(255,255,255,0.5);
+}
+
+.signatures {
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding-bottom: 20px;
+}
+
+.sig-line {
+    width: 280px;
+    border-top: 1.5px solid #333;
+    padding-top: 8px;
+    font-size: 14px;
+}
+
+/* Mod Cetakan */
+@media print {
+    body { background: none; }
+    .certificate { 
+        box-shadow: none; 
+        border: 10px solid var(--gold);
+        -webkit-print-color-adjust: exact; 
+    }
+}
