@@ -36,7 +36,7 @@ function renderNameList(data) {
     });
 }
 
-// 3. Template Sijil (KEMASKINI: Susunan Tajuk & Pengepala Baharu)
+// 3. Template Sijil (KEMASKINI: Nama Masjid diganti dengan Logo PNG & Rujukan Kandungan)
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -44,7 +44,8 @@ function createCertTemplate(item) {
                 <div class="header-with-logos">
                     <img src="logo_masjid.png" class="logo-left" alt="Logo Masjid">
                     <div class="header-text">
-                        <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
+                        <img src="khatmklsb.png" class="mosque-name-logo" alt="Masjid Kampung Sungai Lang Baru">
+                        
                         <h1 class="title">Sijil Penyertaan</h1>
                         <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
                         <p class="sub-title">Dengan ini diperakukan bahawa</p>
@@ -80,17 +81,14 @@ function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const confirmBtn = document.getElementById('modal-confirm-btn');
     
-    // Papar template dalam modal
     area.innerHTML = createCertTemplate(masterData[idx]);
     
-    // Setkan butang sahkan untuk cetak satu sahaja
     confirmBtn.onclick = function() {
         if(confirm("Cetak sijil untuk " + masterData[idx].nama + "?")) {
             printSingleCert(idx);
         }
     };
 
-    // Papar modal
     document.getElementById('preview-modal').style.display = 'block';
     document.getElementById('preview-modal').scrollTop = 0;
 }
@@ -103,28 +101,23 @@ function generateAndPreviewBulk() {
     
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
-    // Kosongkan kawasan preview dalam modal
     area.innerHTML = '';
 
-    // Masukkan semua sijil yang dipilih ke dalam preview modal
     checked.forEach((cb, index) => {
         const idx = cb.value;
         area.innerHTML += createCertTemplate(masterData[idx]);
         
-        // Letakkan pembahagi visual (dashed line) dalam modal sahaja
         if (index < checked.length - 1) {
             area.innerHTML += '<hr class="preview-divider" style="margin: 40px 0; border: 1px dashed #ccc; border-top:none;">';
         }
     });
 
-    // Setkan fungsi butang "Sahkan & Cetak" dalam modal
     confirmBtn.onclick = function() {
         if(confirm("Adakah anda pasti semua maklumat betul? Kertas sijil asal tidak boleh dipadam jika salah cetak.")) {
             executeFinalPrint();
         }
     };
 
-    // Tunjukkan modal
     document.getElementById('preview-modal').style.display = 'block';
     document.getElementById('preview-modal').scrollTop = 0;
 }
@@ -134,18 +127,15 @@ function executeFinalPrint() {
     const container = document.getElementById('certificate-container');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     
-    // Kosongkan bekas cetakan sebenar
     container.innerHTML = '';
 
     checked.forEach((cb, index) => {
         container.innerHTML += createCertTemplate(masterData[cb.value]);
-        // Tambah pemisah muka surat untuk pencetak
         if (index < checked.length - 1) {
             container.innerHTML += '<div class="page-break"></div>';
         }
     });
 
-    // Tutup modal sebelum kotak dialog print sistem muncul
     closePreview();
 
     document.getElementById('status-text').innerText = "Sedang menghantar ke pencetak...";
@@ -153,7 +143,7 @@ function executeFinalPrint() {
     setTimeout(() => { 
         window.print(); 
         document.getElementById('status-text').innerText = "Cetakan selesai.";
-        container.innerHTML = ''; // Bersihkan container selepas print selesai
+        container.innerHTML = ''; 
     }, 1000);
 }
 
@@ -183,7 +173,6 @@ function filterData() {
     document.querySelectorAll('.name-item').forEach(item => {
         const match = (group === "ALL" || item.getAttribute('data-group') === group);
         item.style.display = match ? "flex" : "none";
-        // Automatik nyah-tanda (uncheck) jika tidak sepadan filter
         if(!match) item.querySelector('input').checked = false;
     });
 }
