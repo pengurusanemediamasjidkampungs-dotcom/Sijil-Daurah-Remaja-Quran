@@ -167,7 +167,6 @@ body {
 }
 
 .logo-program-bottom {
-    /* DIKEMASKINI: Menggunakan variable khusus logo kedua */
     height: var(--logo-program-size) !important;
     width: auto;
     object-fit: contain;
@@ -227,9 +226,22 @@ body {
     margin: 20px auto; 
     padding: 25px; 
     width: 95%; 
-    max-width: 1250px;
+    max-width: 1350px;
     border-radius: 12px; 
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- GAYA BARU: CONTAINER PRALIHAT INDIVIDU --- */
+.preview-item-container {
+    background: #f0f0f0;
+    padding: 30px;
+    margin-bottom: 50px;
+    border-radius: 15px;
+    border: 2px dashed #bbb;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -239,7 +251,7 @@ body {
 #preview-area .certificate {
     transform: scale(0.6);
     transform-origin: top center;
-    margin-bottom: -80mm; 
+    margin-bottom: -75mm; /* Melaraskan ruang selepas scale */
 }
 
 /* --- FORMAT PORTRAIT --- */
@@ -255,10 +267,10 @@ body {
 
 .preview-divider {
     display: block;
-    width: 100%;
-    margin: 40px 0;
+    width: 80%;
+    margin: 40px auto;
     border: none;
-    border-top: 2px dashed #ccc;
+    border-top: 2px dashed #aaa;
 }
 
 /* --- LOGIK CETAKAN (FINAL) --- */
@@ -273,11 +285,22 @@ body {
         display: block !important;
     }
 
+    /* Sembunyikan semua elemen UI semasa cetak */
     .no-print, 
     .control-panel-live,
-    #preview-modal, 
-    .preview-divider { 
+    #preview-modal,
+    .preview-item-container button,
+    .preview-divider,
+    .preview-tag { 
         display: none !important; 
+    }
+
+    /* Hilangkan gaya container pralihat supaya sijil bersih */
+    .preview-item-container {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     #certificate-container {
