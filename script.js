@@ -1,6 +1,6 @@
 /**
  * LOGIK UTAMA - script.js
- * Fokus: Pengurusan Data, UI Control Panel, Integrasi Print Engine, dan Telegram Bot
+ * Fokus: Pengurusan Data, UI Control Panel, Integrasi html2pdf, dan Telegram Bot
  */
 
 let masterData = [];
@@ -39,7 +39,7 @@ function renderNameList(data) {
                 <button onclick="printSingleCertByIndex(${index})" class="no-print btn-quick-print">
                     CETAK 🖨️
                 </button>
-                <button onclick="hantarKeTelegramByIndex(${index})" class="no-print btn-quick-telegram" style="background: #0088cc; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                <button onclick="hantarKeTelegramByIndex(${index})" class="no-print btn-quick-telegram">
                     BOT 🚀
                 </button>
             </div>
@@ -48,72 +48,66 @@ function renderNameList(data) {
 }
 
 /**
- * 2. INTEGRASI TELEGRAM BOT (DIRECT PDF)
+ * 2. INTEGRASI TELEGRAM BOT (BROWSER-SIDE PDF GENERATION)
+ * Menggunakan html2pdf.js untuk menukar HTML kepada Blob PDF
  */
 async function hantarKeTelegram(peserta) {
-    // 1. Dapatkan elemen sijil
-    const certElement = document.querySelector('.certificate');
-    if (!certElement) {
-        alert("Sijil tidak dijumpai dalam DOM!");
-        return;
-    }
+    const element = document.querySelector('.certificate');
+    if (!element) return alert("Sijil tidak dijumpai! Sila buka pralihat (preview) terlebih dahulu.");
 
-    // 2. Kumpul gaya CSS (Penting untuk border emas & font)
-    const styles = Array.from(document.styleSheets)
-        .map(sheet => {
-            try {
-                return Array.from(sheet.cssRules).map(r => r.cssText).join('');
-            } catch (e) { return ''; }
-        }).join('');
+    // Konfigurasi penukaran ke PDF
+    const opt = {
+        margin: 0,
+        filename: `Sijil_${peserta.nama.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false,
+            letterRendering: true
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: currentOrientation 
+        }
+    };
 
-    // 3. Bina HTML penuh untuk dihantar ke Python
-    const fullHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                ${styles}
-                body { margin: 0; padding: 0; background: white; }
-                .certificate { 
-                    margin: 0 !important; 
-                    box-shadow: none !important; 
-                    transform: none !important; 
-                }
-            </style>
-        </head>
-        <body>
-            ${certElement.outerHTML}
-        </body>
-        </html>`;
-
-    // 4. Hantar ke API Python Flask
     try {
-        const response = await fetch('http://localhost:5000/send_pdf', {
+        console.log("Sedang menjana fail PDF...");
+        
+        // 1. Jana PDF sebagai Blob (Data mentah fail)
+        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+
+        // 2. Bungkus ke dalam FormData
+        const formData = new FormData();
+        formData.append('file', pdfBlob, opt.filename);
+        formData.append('nama', peserta.nama);
+
+        // 3. Hantar ke app.py (Endpoint: /upload_pdf)
+        const response = await fetch('http://localhost:5000/upload_pdf', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nama: peserta.nama,
-                html: fullHTML
-            })
+            body: formData 
         });
 
         const result = await response.json();
         if (result.status === 'success') {
-            alert(`✅ Berjaya! Sijil ${peserta.nama} telah dihantar ke Telegram.`);
+            alert(`✅ Sijil ${peserta.nama} berjaya dihantar ke Telegram!`);
         } else {
-            alert("❌ Ralat Server: " + result.message);
+            alert("❌ Gagal: " + result.message);
         }
     } catch (error) {
-        alert("⚠️ Ralat: Pastikan server Python (app.py) sedang berjalan di terminal!");
+        console.error(error);
+        alert("⚠️ Ralat! Pastikan server Python (app.py) aktif di terminal.");
     }
 }
 
 function hantarKeTelegramByIndex(idx) {
     if(masterData[idx]) {
-        // Kita perlu render sekejap ke dalam elemen tersembunyi jika tiada preview terbuka
-        // Tetapi cara paling mudah: buka preview dan hantar.
+        // Paparkan preview dahulu supaya elemen .certificate wujud dalam DOM
         showPreview(idx);
-        setTimeout(() => hantarKeTelegram(masterData[idx]), 500);
+        // Beri sedikit masa untuk rendering selesai sebelum jana PDF
+        setTimeout(() => hantarKeTelegram(masterData[idx]), 800);
     }
 }
 
