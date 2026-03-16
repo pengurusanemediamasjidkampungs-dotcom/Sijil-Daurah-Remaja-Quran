@@ -4,7 +4,8 @@
  */
 
 let masterData = [];
-let currentOrientation = 'landscape';
+// 1. DEFAULT ORIENTASI KE PORTRAIT
+let currentOrientation = 'portrait';
 
 /**
  * 1. MUAT DATA & RENDER
@@ -15,6 +16,13 @@ async function loadData() {
         if (!res.ok) throw new Error("Gagal mengambil data.json");
         masterData = await res.json();
         renderNameList(masterData);
+        
+        // 2. TETAPKAN NILAI DEFAULT PADA CSS VARIABLES
+        document.documentElement.style.setProperty('--logo-size', '250px');
+        document.documentElement.style.setProperty('--logo-program-size', '150px');
+        document.documentElement.style.setProperty('--name-size', '28px');
+        document.documentElement.style.setProperty('--content-spacing', '0px');
+        
         document.getElementById('status-text').innerText = `${masterData.length} peserta sedia ada.`;
     } catch (e) {
         console.error(e);
@@ -51,7 +59,7 @@ function renderNameList(data) {
  * 2. INTEGRASI TELEGRAM BOT (BROWSER-SIDE PDF GENERATION)
  */
 async function hantarKeTelegram(peserta) {
-    // Cari elemen sijil yang sedang aktif di skrin
+    // Mencari elemen sijil aktif dalam DOM
     const element = document.querySelector('.certificate');
     if (!element) return { status: 'error', message: 'Sijil tidak dijumpai!' };
 
@@ -91,7 +99,7 @@ function hantarKeTelegramByIndex(idx) {
             } catch (e) {
                 alert("⚠️ Gagal menghantar. Semak console.");
             }
-        }, 1000); // Beri masa lebih lama untuk render
+        }, 1200); // Masa bertenang untuk render tunggal
     }
 }
 
@@ -109,10 +117,10 @@ function injectControlPanel() {
         <div class="control-panel-live no-print">
             <h4 style="margin-top:0; color:#333; border-bottom:2px solid #d4af37; padding-bottom:5px;">Kawalan Kekemasan Sijil (Live)</h4>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                <div><label>Saiz Logo Masjid: <span id="val-logo-size">140px</span></label><input type="range" min="50" max="250" value="140" style="width:100%" oninput="updateLiveStyle('logo-size', this.value)"></div>
-                <div><label>Saiz Logo Program: <span id="val-logo-program-size">120px</span></label><input type="range" min="50" max="250" value="120" style="width:100%" oninput="updateLiveStyle('logo-program-size', this.value)"></div>
-                <div><label>Saiz Nama: <span id="val-name-size">48px</span></label><input type="range" min="20" max="100" value="48" style="width:100%" oninput="updateLiveStyle('name-size', this.value)"></div>
-                <div><label>Jarak Kandungan: <span id="val-content-spacing">25px</span></label><input type="range" min="0" max="100" value="25" style="width:100%" oninput="updateLiveStyle('content-spacing', this.value)"></div>
+                <div><label>Saiz Logo Masjid: <span id="val-logo-size">250px</span></label><input type="range" min="50" max="400" value="250" style="width:100%" oninput="updateLiveStyle('logo-size', this.value)"></div>
+                <div><label>Saiz Logo Program: <span id="val-logo-program-size">150px</span></label><input type="range" min="50" max="400" value="150" style="width:100%" oninput="updateLiveStyle('logo-program-size', this.value)"></div>
+                <div><label>Saiz Nama: <span id="val-name-size">28px</span></label><input type="range" min="10" max="100" value="28" style="width:100%" oninput="updateLiveStyle('name-size', this.value)"></div>
+                <div><label>Jarak Kandungan: <span id="val-content-spacing">0px</span></label><input type="range" min="0" max="100" value="0" style="width:100%" oninput="updateLiveStyle('content-spacing', this.value)"></div>
             </div>
         </div>
     `;
@@ -205,7 +213,7 @@ function closePreview() {
 }
 
 /**
- * 7. AUTO-RUN BULK TELEGRAM (VERSI ANTI-NAMA-SAMA)
+ * 7. AUTO-RUN BULK TELEGRAM (VERSI ANTI-NAMA-SAMA + DEFAULT PORTRAIT)
  */
 async function hantarSemuaPilihan() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
@@ -226,13 +234,13 @@ async function hantarSemuaPilihan() {
         statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
 
         try {
-            // 1. Paksa modal buka dan render template spesifik peserta ini (UTAMA)
+            // 1. Paksa modal render data peserta semasa (Crucial untuk Anti-Nama-Sama)
             showPreview(idx);
             
-            // 2. Beri masa 1.5 saat untuk pastikan DOM betul-betul sudah bertukar nama
+            // 2. Masa bertenang 1.5 saat untuk pastikan DOM benar-benar update
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            // 3. Jalankan penghantaran (Fungsi ini akan cari elemen .certificate yang baru di-render)
+            // 3. Jalankan proses upload
             const res = await hantarKeTelegram(peserta);
             
             if(res.status === 'success') {
