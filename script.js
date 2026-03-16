@@ -28,11 +28,16 @@ function renderNameList(data) {
 
     listDiv.innerHTML = data.map((item, index) => `
         <div class="name-item" data-group="${item.kumpulan || 'ALL'}">
-            <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
-            <label for="user-${index}">
-                <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
-                <br><small>${item.ic}</small>
-            </label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
+                <label for="user-${index}">
+                    <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
+                    <br><small>${item.ic}</small>
+                </label>
+            </div>
+            <button onclick="printSingleCertByIndex(${index})" class="no-print btn-quick-print">
+                CETAK 🖨️
+            </button>
         </div>
     `).join('');
 }
@@ -41,61 +46,58 @@ function renderNameList(data) {
  * 2. LIVE CONTROL ENGINE
  */
 function updateLiveStyle(prop, value) {
-    // Kemaskini variable CSS di peringkat root (document)
     document.documentElement.style.setProperty(`--${prop}`, value + 'px');
-    
-    // Kemaskini teks label pada slider
     const label = document.getElementById(`val-${prop}`);
     if (label) label.innerText = value + 'px';
 }
 
 function injectControlPanel() {
     return `
-        <div class="control-panel-live no-print" style="background:#f8f9fa; padding:20px; border:1px solid #ddd; border-radius:10px; margin-bottom:25px; width:100%; font-family:sans-serif; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        <div class="control-panel-live no-print">
             <h4 style="margin-top:0; color:#333; border-bottom:2px solid #d4af37; padding-bottom:5px;">Kawalan Kekemasan Sijil (Live)</h4>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                
                 <div>
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Saiz Logo Masjid: <span id="val-logo-size">140px</span></label>
+                    <label>Saiz Logo Masjid: <span id="val-logo-size">140px</span></label>
                     <input type="range" min="50" max="250" value="140" style="width:100%" oninput="updateLiveStyle('logo-size', this.value)">
                 </div>
-
                 <div>
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Saiz Logo Program: <span id="val-logo-program-size">120px</span></label>
+                    <label>Saiz Logo Program: <span id="val-logo-program-size">120px</span></label>
                     <input type="range" min="50" max="250" value="120" style="width:100%" oninput="updateLiveStyle('logo-program-size', this.value)">
                 </div>
-
                 <div>
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Saiz Nama: <span id="val-name-size">48px</span></label>
+                    <label>Saiz Nama: <span id="val-name-size">48px</span></label>
                     <input type="range" min="20" max="100" value="48" style="width:100%" oninput="updateLiveStyle('name-size', this.value)">
                 </div>
-
                 <div>
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Jarak Kandungan: <span id="val-content-spacing">25px</span></label>
+                    <label>Jarak Kandungan: <span id="val-content-spacing">25px</span></label>
                     <input type="range" min="0" max="100" value="25" style="width:100%" oninput="updateLiveStyle('content-spacing', this.value)">
                 </div>
-
             </div>
-            <p style="font-size:11px; color:#666; margin-top:15px; font-style:italic;">*Pelarasan ini bersifat sementara untuk sesi cetakan ini sahaja.</p>
         </div>
     `;
 }
 
 /**
- * 3. LOGIK MODAL & PREVIEW
+ * 3. LOGIK MODAL & PREVIEW (DIKEMASKINI DENGAN BUTANG INDIVIDU)
  */
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
-    const confirmBtn = document.getElementById('modal-confirm-btn');
     
-    // Panggil template dari print-engine.js
-    area.innerHTML = injectControlPanel() + createCertTemplate(masterData[idx], currentOrientation);
-    
-    confirmBtn.onclick = function() {
-        if(confirm(`Cetak sijil untuk ${masterData[idx].nama}?`)) {
-            printSingleCert(masterData[idx], currentOrientation);
-        }
+    // Paparan untuk seorang sahaja
+    area.innerHTML = injectControlPanel() + `
+        <div class="preview-item-container">
+            <div class="no-print" style="margin-bottom: 15px;">
+                <button onclick="printSingleCertByIndex(${idx})" class="action-btn" style="background:#27ae60; margin:0;">
+                    🖨️ CETAK SIJIL INI SAHAJA
+                </button>
+            </div>
+            ${createCertTemplate(masterData[idx], currentOrientation)}
+        </div>
+    `;
+
+    document.getElementById('modal-confirm-btn').onclick = function() {
+        printSingleCert(masterData[idx], currentOrientation);
     };
 
     modal.style.display = 'block';
@@ -103,22 +105,35 @@ function showPreview(idx) {
 }
 
 function generateAndPreviewBulk() {
-    const area = document.getElementById('preview-area');
-    const modal = document.getElementById('preview-modal');
-    const confirmBtn = document.getElementById('modal-confirm-btn');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
-    
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
+    const area = document.getElementById('preview-area');
+    const modal = document.getElementById('preview-modal');
     const selectedData = Array.from(checked).map(cb => masterData[cb.value]);
 
-    // Bina kandungan pralihat (dengan divider)
-    let certsContent = selectedData.map((item) => createCertTemplate(item, currentOrientation)).join('<hr class="preview-divider">');
+    // Bina kandungan: Setiap sijil ada butang cetak sendiri di atasnya
+    let certsContent = selectedData.map((item) => {
+        const originalIndex = masterData.indexOf(item);
+        return `
+            <div class="preview-item-container" style="width:100%; text-align:center; margin-bottom:80px; padding:20px; background:#f9f9f9; border-radius:10px;">
+                <div class="no-print" style="margin-bottom: 20px;">
+                    <button onclick="printSingleCertByIndex(${originalIndex})" 
+                            style="background:#2ecc71; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        🖨️ CETAK SIJIL: ${item.nama}
+                    </button>
+                </div>
+                ${createCertTemplate(item, currentOrientation)}
+                <hr class="preview-divider no-print">
+            </div>
+        `;
+    }).join('');
 
     area.innerHTML = injectControlPanel() + certsContent;
 
-    confirmBtn.onclick = function() {
-        if(confirm(`Adakah anda pasti untuk mencetak ${selectedData.length} sijil?`)) {
+    // Butang di bahagian bawah modal untuk cetak semua sekali
+    document.getElementById('modal-confirm-btn').onclick = function() {
+        if(confirm(`Cetak semua ${selectedData.length} sijil secara pukal?`)) {
             executeFinalPrint(selectedData, currentOrientation);
         }
     };
@@ -128,11 +143,19 @@ function generateAndPreviewBulk() {
 }
 
 /**
- * 4. UTILITI UI (Filter, Toggle, Orientation)
+ * 4. FUNGSI HELPER CETAKAN
+ */
+function printSingleCertByIndex(idx) {
+    if(masterData[idx]) {
+        printSingleCert(masterData[idx], currentOrientation);
+    }
+}
+
+/**
+ * 5. UTILITI UI (Filter, Toggle, Orientation)
  */
 function updateOrientation() {
     currentOrientation = document.getElementById('orientation-selector').value;
-    // Jika pralihat sedang dibuka, kemaskini paparan secara live
     const modal = document.getElementById('preview-modal');
     if (modal.style.display === 'block') {
         const certs = document.querySelectorAll('.certificate');
@@ -149,8 +172,6 @@ function filterData() {
         const itemGroup = item.getAttribute('data-group');
         const isMatch = (group === "ALL" || itemGroup === group);
         item.style.display = isMatch ? "flex" : "none";
-        
-        // Uncheck jika disembunyikan untuk elak tersalah cetak
         if(!isMatch) item.querySelector('input').checked = false;
     });
 }
@@ -168,5 +189,5 @@ function closePreview() {
     document.getElementById('preview-area').innerHTML = ''; 
 }
 
-// Mula sistem
+// Inisialisasi
 loadData();
