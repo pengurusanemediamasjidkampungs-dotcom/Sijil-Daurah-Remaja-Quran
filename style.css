@@ -61,7 +61,7 @@ body {
     margin-bottom: 5px;
 }
 
-/* KEMASKINI: Saiz logo masjid (kiri) dibesarkan 20% */
+/* Saiz logo masjid (kiri) */
 .logo-left {
     height: 155px; 
     width: auto;
@@ -69,6 +69,7 @@ body {
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
 }
 
+/* Saiz logo program (kanan) */
 .logo-right {
     height: 130px; 
     width: auto;
@@ -84,6 +85,15 @@ body {
     align-items: center;
 }
 
+/* KEMASKINI: Gaya untuk Logo Nama Masjid (PNG Khat) */
+.mosque-name-logo {
+    height: 55px; /* Ditingkatkan sedikit daripada 45px untuk impak visual lebih baik */
+    width: auto;
+    margin-bottom: 8px;
+    object-fit: contain;
+    filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.05));
+}
+
 .institution { 
     font-family: 'Open Sans', sans-serif; 
     font-weight: 700; 
@@ -95,9 +105,9 @@ body {
 
 .title { 
     font-family: 'Playfair Display', serif; 
-    font-size: 48px; /* Kecilkan sedikit supaya muat dengan tajuk program */
+    font-size: 48px; 
     color: var(--dark-gold); 
-    margin: 5px 0 0 0; 
+    margin: 2px 0 0 0; /* Dikurangkan margin atas kerana ada logo di atasnya */
     text-transform: uppercase; 
 }
 
@@ -105,14 +115,14 @@ body {
     font-family: 'Open Sans', sans-serif;
     font-size: 18px; 
     margin: 5px 0;
-    font-style: italic; /* Tambah sedikit gaya italik untuk perakuan */
+    font-style: italic;
 }
 
 /* --- TAJUK PROGRAM (DI ATAS NAMA) --- */
 .program-name-top {
     font-family: 'Playfair Display', serif;
     font-weight: 800;
-    font-size: 28px; /* Saiz yang seimbang di bawah "Sijil Penyertaan" */
+    font-size: 28px; 
     color: var(--dark-gold);
     margin: 0 0 10px 0;
     letter-spacing: 1.5px;
@@ -125,7 +135,7 @@ body {
     font-size: 48px; 
     font-weight: 700;
     color: #1a1a1a;
-    margin-top: 25px; /* Laraskan supaya tidak terlalu rapat ke atas */
+    margin-top: 25px; 
     margin-bottom: 8px;
     border-bottom: 2.5px solid var(--gold);
     min-width: 700px;
