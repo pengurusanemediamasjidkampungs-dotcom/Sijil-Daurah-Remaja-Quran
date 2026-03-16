@@ -34,7 +34,14 @@ function renderNameList(data) {
     `).join('');
 }
 
-// 3. Live Control Panel HTML
+// 3. Update CSS Variables (Diletakkan di atas agar template dapat mengaksesnya dengan stabil)
+function updateLiveStyle(prop, value) {
+    document.documentElement.style.setProperty(`--${prop}`, value + 'px');
+    const label = document.getElementById(`val-${prop}`);
+    if(label) label.innerText = value + 'px';
+}
+
+// 4. Live Control Panel HTML
 function injectControlPanel() {
     return `
         <div class="control-panel-live no-print" style="background:#f8f9fa; padding:20px; border:1px solid #ddd; border-radius:10px; margin-bottom:25px; width:100%; font-family:sans-serif; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -60,13 +67,6 @@ function injectControlPanel() {
             <p style="font-size:11px; color:#666; margin-top:15px; font-style:italic;">*Pelarasan ini hanya untuk paparan cetakan semasa dan tidak mengubah fail asal.</p>
         </div>
     `;
-}
-
-// 4. Update CSS Variables & Orientasi
-function updateLiveStyle(prop, value) {
-    document.documentElement.style.setProperty(`--${prop}`, value + 'px');
-    const label = document.getElementById(`val-${prop}`);
-    if(label) label.innerText = value + 'px';
 }
 
 function updateOrientation() {
