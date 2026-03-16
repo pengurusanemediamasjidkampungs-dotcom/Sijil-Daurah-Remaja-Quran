@@ -27,7 +27,7 @@ body {
     width: 297mm;
     height: 210mm;
     background-color: #fffdf0;
-    background-image: url('image_24ecda.jpg');
+    background-image: url('image_24ecda.jpg'); /* Pastikan fail imej ini wujud */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -62,7 +62,7 @@ body {
 }
 
 .logo-left, .logo-right {
-    height: 140px; 
+    height: 130px; 
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
@@ -96,13 +96,25 @@ body {
     margin: 0; 
 }
 
+/* --- TAJUK PROGRAM (DI ATAS NAMA) --- */
+.program-name-top {
+    font-family: 'Playfair Display', serif;
+    font-weight: 800;
+    font-size: 34px;
+    color: var(--dark-gold);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
 /* --- MAKLUMAT PESERTA --- */
 .participant-name {
     font-family: 'Open Sans', sans-serif;
     font-size: 48px; 
     font-weight: 700;
     color: #1a1a1a;
-    margin-top: 15px;
+    margin-top: 10px;
     margin-bottom: 8px;
     border-bottom: 2.5px solid var(--gold);
     min-width: 700px;
@@ -113,31 +125,20 @@ body {
 
 .participant-ic { 
     font-family: 'Open Sans', sans-serif;
-    font-size: 19px; 
+    font-size: 20px; 
     font-weight: 600; 
     color: #333; 
-    margin-bottom: 12px; 
+    margin-bottom: 15px; 
 }
 
-/* --- INFO PROGRAM (VERSI KEMASKINI TANPA JADUAL) --- */
-.program-info-new {
+/* --- INFO PROGRAM DI BAWAH NAMA --- */
+.program-info-final {
     font-family: 'Open Sans', sans-serif;
     font-size: 20px; 
     line-height: 1.8;
-    margin: 30px 0;
+    margin: 25px 0;
     color: #333;
     max-width: 85%;
-}
-
-.program-name-large {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 32px;
-    color: var(--dark-gold);
-    display: block;
-    margin-top: 15px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
 }
 
 /* --- TANDA TANGAN --- */
@@ -146,7 +147,7 @@ body {
     width: 100%;
     display: flex;
     justify-content: center; 
-    padding-bottom: 40px; /* Jarak bawah ditambah supaya nampak stabil */
+    padding-bottom: 45px;
 }
 
 .sig-wrapper {
@@ -158,10 +159,10 @@ body {
 }
 
 .signature-img {
-    height: 95px; 
+    height: 100px; 
     width: auto;
     position: absolute;
-    bottom: 50px; 
+    bottom: 55px; 
     pointer-events: none;
     z-index: 5;
 }
@@ -170,7 +171,7 @@ body {
     width: 100%;
     border-top: 2px solid #333;
     padding-top: 10px;
-    font-size: 15px;
+    font-size: 16px;
     color: #1a1a1a;
     text-align: center;
     line-height: 1.4;
