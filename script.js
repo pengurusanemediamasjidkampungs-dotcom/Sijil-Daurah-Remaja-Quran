@@ -1,9 +1,10 @@
 /**
  * SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Logik Utama: script.js (Updated with Professional Program Info)
+ * Logik Utama: script.js (Updated with Portrait Orientation Support)
  */
 
 let masterData = [];
+let currentOrientation = 'landscape'; // Default orientasi
 
 // 1. Muat data dari data.json
 async function loadData() {
@@ -61,17 +62,33 @@ function injectControlPanel() {
     `;
 }
 
-// 4. Update CSS Variables secara Real-Time
+// 4. Update CSS Variables & Orientasi
 function updateLiveStyle(prop, value) {
     document.documentElement.style.setProperty(`--${prop}`, value + 'px');
     const label = document.getElementById(`val-${prop}`);
     if(label) label.innerText = value + 'px';
 }
 
-// 5. Template Sijil (KEMASKINI: Maklumat Program 2 Baris)
+function updateOrientation() {
+    currentOrientation = document.getElementById('orientation-selector').value;
+    
+    // Kemaskini semua elemen sijil yang ada dalam DOM (terutama dalam preview)
+    const certs = document.querySelectorAll('.certificate');
+    certs.forEach(c => {
+        if(currentOrientation === 'portrait') {
+            c.classList.add('portrait');
+        } else {
+            c.classList.remove('portrait');
+        }
+    });
+}
+
+// 5. Template Sijil (KEMASKINI: Sokongan Portrait Dinamik)
 function createCertTemplate(item) {
+    const portraitClass = (currentOrientation === 'portrait') ? 'portrait' : '';
+    
     return `
-        <div class="certificate">
+        <div class="certificate ${portraitClass}">
             <div class="content-overlay">
                 <div class="header-with-logos">
                     <img src="logo_masjid.png" class="logo-left" alt="Logo Masjid">
