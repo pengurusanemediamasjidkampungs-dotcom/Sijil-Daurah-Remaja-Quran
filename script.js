@@ -5,7 +5,7 @@
 
 let masterData = [];
 
-// 1. Muat data dari data.json apabila halaman dibuka
+// 1. Muat data dari data.json
 async function loadData() {
     try {
         const res = await fetch('data.json');
@@ -19,24 +19,21 @@ async function loadData() {
     }
 }
 
-// 2. Papar senarai nama pada panel kawalan
+// 2. Papar senarai nama (Optimasi dengan map)
 function renderNameList(data) {
     const listDiv = document.getElementById('name-list');
-    listDiv.innerHTML = '';
-    data.forEach((item, index) => {
-        listDiv.innerHTML += `
-            <div class="name-item" data-group="${item.kumpulan}">
-                <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
-                <label for="user-${index}">
-                    <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
-                    <br><small>${item.ic}</small>
-                </label>
-            </div>
-        `;
-    });
+    listDiv.innerHTML = data.map((item, index) => `
+        <div class="name-item" data-group="${item.kumpulan || 'ALL'}">
+            <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
+            <label for="user-${index}">
+                <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
+                <br><small>${item.ic}</small>
+            </label>
+        </div>
+    `).join('');
 }
 
-// 3. Template Sijil (KEMASKINI: Nama Masjid diganti dengan Logo PNG & Rujukan Kandungan)
+// 3. Template Sijil (Standard DRQ 2026)
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -76,7 +73,7 @@ function createCertTemplate(item) {
     `;
 }
 
-// 4. Logik Preview Individu (Klik pada nama)
+// 4. Logik Preview Individu
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const confirmBtn = document.getElementById('modal-confirm-btn');
@@ -93,7 +90,7 @@ function showPreview(idx) {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 5. Fungsi untuk Pralihat Pukal (Bulk Preview - Butang Hijau Utama)
+// 5. Pralihat Pukal
 function generateAndPreviewBulk() {
     const area = document.getElementById('preview-area');
     const confirmBtn = document.getElementById('modal-confirm-btn');
@@ -101,19 +98,17 @@ function generateAndPreviewBulk() {
     
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
-    area.innerHTML = '';
-
-    checked.forEach((cb, index) => {
+    area.innerHTML = Array.from(checked).map((cb, index) => {
         const idx = cb.value;
-        area.innerHTML += createCertTemplate(masterData[idx]);
-        
+        let html = createCertTemplate(masterData[idx]);
         if (index < checked.length - 1) {
-            area.innerHTML += '<hr class="preview-divider" style="margin: 40px 0; border: 1px dashed #ccc; border-top:none;">';
+            html += '<hr class="preview-divider">';
         }
-    });
+        return html;
+    }).join('');
 
     confirmBtn.onclick = function() {
-        if(confirm("Adakah anda pasti semua maklumat betul? Kertas sijil asal tidak boleh dipadam jika salah cetak.")) {
+        if(confirm("Adakah anda pasti? Sila pastikan kertas sijil telah dimasukkan ke dalam pencetak.")) {
             executeFinalPrint();
         }
     };
@@ -122,23 +117,21 @@ function generateAndPreviewBulk() {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 6. Fungsi Eksekusi Cetakan Terakhir (Window Print)
+// 6. Eksekusi Cetakan
 function executeFinalPrint() {
     const container = document.getElementById('certificate-container');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     
-    container.innerHTML = '';
-
-    checked.forEach((cb, index) => {
-        container.innerHTML += createCertTemplate(masterData[cb.value]);
+    container.innerHTML = Array.from(checked).map((cb, index) => {
+        let html = createCertTemplate(masterData[cb.value]);
         if (index < checked.length - 1) {
-            container.innerHTML += '<div class="page-break"></div>';
+            html += '<div class="page-break"></div>';
         }
-    });
+        return html;
+    }).join('');
 
     closePreview();
-
-    document.getElementById('status-text').innerText = "Sedang menghantar ke pencetak...";
+    document.getElementById('status-text').innerText = "Sedang menyediakan dokumen...";
     
     setTimeout(() => { 
         window.print(); 
@@ -147,14 +140,11 @@ function executeFinalPrint() {
     }, 1000);
 }
 
-// 7. Fungsi Cetak Sijil Tunggal (Dipanggil dari pengesahan individu)
+// 7. Cetak Sijil Tunggal
 function printSingleCert(idx) {
     const container = document.getElementById('certificate-container');
-    container.innerHTML = ''; 
     container.innerHTML = createCertTemplate(masterData[idx]);
-    
     closePreview();
-
     setTimeout(() => {
         window.print();
         container.innerHTML = '';
@@ -171,17 +161,21 @@ function closePreview() {
 function filterData() {
     const group = document.getElementById('group-filter').value;
     document.querySelectorAll('.name-item').forEach(item => {
-        const match = (group === "ALL" || item.getAttribute('data-group') === group);
-        item.style.display = match ? "flex" : "none";
-        if(!match) item.querySelector('input').checked = false;
+        const itemGroup = item.getAttribute('data-group');
+        const isMatch = (group === "ALL" || itemGroup === group);
+        item.style.display = isMatch ? "flex" : "none";
+        // Hanya uncheck jika ia disembunyikan
+        if(!isMatch) item.querySelector('input').checked = false;
     });
 }
 
 function toggleAll(status) {
-    document.querySelectorAll('.cert-checkbox').forEach(cb => {
-        if(cb.parentElement.style.display !== "none") cb.checked = status;
+    document.querySelectorAll('.name-item').forEach(item => {
+        if(item.style.display !== "none") {
+            item.querySelector('.cert-checkbox').checked = status;
+        }
     });
 }
 
-// Jalankan loadData
+// Mula
 loadData();
