@@ -79,86 +79,116 @@ function createCertTemplate(item) {
     `;
 }
 
-// 4. Logik Preview (Munculkan Modal)
+// 4. Logik Preview Individu (Klik pada nama)
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
-    const printBtn = document.getElementById('modal-print-btn');
+    const confirmBtn = document.getElementById('modal-confirm-btn');
     
     // Papar template dalam modal
     area.innerHTML = createCertTemplate(masterData[idx]);
     
-    // Konfigurasi butang cetak dalam modal
-    printBtn.onclick = function() {
-        printSingleCert(idx);
+    // Setkan butang sahkan untuk cetak satu sahaja
+    confirmBtn.onclick = function() {
+        if(confirm("Cetak sijil untuk " + masterData[idx].nama + "?")) {
+            printSingleCert(idx);
+        }
     };
 
-    // Papar modal & reset scroll
+    // Papar modal
     document.getElementById('preview-modal').style.display = 'block';
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 5. Cetak Sijil Tunggal dari Preview (KEMASKINI: Pembersihan Container)
-function printSingleCert(idx) {
-    const container = document.getElementById('certificate-container');
-    
-    // PENTING: Kosongkan container dahulu supaya tidak bercampur dengan data lama
-    container.innerHTML = ''; 
-    
-    // Masukkan template sijil yang dipilih
-    container.innerHTML = createCertTemplate(masterData[idx]);
-    
-    // Beri sedikit masa untuk pelayar render imej/background sebelum dialog print keluar
-    setTimeout(() => {
-        window.print();
-        // Selepas selesai print/cancel, kosongkan semula container untuk elak frame kosong tertinggal
-        container.innerHTML = '';
-    }, 500);
-}
-
-// 6. Cetak Pukal / Bulk Print (KEMASKINI: Logik Page Break & Pembersihan)
-function generateAndPrint() {
-    const container = document.getElementById('certificate-container');
+// 5. Fungsi untuk Pralihat Pukal (Bulk Preview - Butang Hijau Utama)
+function generateAndPreviewBulk() {
+    const area = document.getElementById('preview-area');
+    const confirmBtn = document.getElementById('modal-confirm-btn');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
-    // Kosongkan container sebelum mula menjana yang baru
+    // Kosongkan kawasan preview dalam modal
+    area.innerHTML = '';
+
+    // Masukkan semua sijil yang dipilih ke dalam preview modal
+    checked.forEach((cb, index) => {
+        const idx = cb.value;
+        area.innerHTML += createCertTemplate(masterData[idx]);
+        
+        // Letakkan pembahagi visual (dashed line) dalam modal sahaja
+        if (index < checked.length - 1) {
+            area.innerHTML += '<hr class="preview-divider" style="margin: 40px 0; border: 1px dashed #ccc; border-top:none;">';
+        }
+    });
+
+    // Setkan fungsi butang "Sahkan & Cetak" dalam modal
+    confirmBtn.onclick = function() {
+        if(confirm("Adakah anda pasti semua maklumat betul? Kertas sijil asal tidak boleh dipadam jika salah cetak.")) {
+            executeFinalPrint();
+        }
+    };
+
+    // Tunjukkan modal
+    document.getElementById('preview-modal').style.display = 'block';
+    document.getElementById('preview-modal').scrollTop = 0;
+}
+
+// 6. Fungsi Eksekusi Cetakan Terakhir (Window Print)
+function executeFinalPrint() {
+    const container = document.getElementById('certificate-container');
+    const checked = document.querySelectorAll('.cert-checkbox:checked');
+    
+    // Kosongkan bekas cetakan sebenar
     container.innerHTML = '';
 
     checked.forEach((cb, index) => {
-        const idx = cb.value;
-        // Tambah sijil ke dalam container
-        container.innerHTML += createCertTemplate(masterData[idx]);
-        
-        // Tambah page-break jika bukan sijil terakhir (supaya tidak ada page kosong di hujung)
+        container.innerHTML += createCertTemplate(masterData[cb.value]);
+        // Tambah pemisah muka surat untuk pencetak
         if (index < checked.length - 1) {
             container.innerHTML += '<div class="page-break"></div>';
         }
     });
 
-    document.getElementById('status-text').innerText = "Menyediakan dokumen cetakan...";
+    // Tutup modal sebelum kotak dialog print sistem muncul
+    closePreview();
+
+    document.getElementById('status-text').innerText = "Sedang menghantar ke pencetak...";
     
     setTimeout(() => { 
         window.print(); 
         document.getElementById('status-text').innerText = "Cetakan selesai.";
-        // Kosongkan container selepas selesai cetak
-        container.innerHTML = '';
+        container.innerHTML = ''; // Bersihkan container selepas print selesai
     }, 1000);
 }
 
-// 7. Tutup Modal
+// 7. Fungsi Cetak Sijil Tunggal (Dipanggil dari pengesahan individu)
+function printSingleCert(idx) {
+    const container = document.getElementById('certificate-container');
+    container.innerHTML = ''; 
+    container.innerHTML = createCertTemplate(masterData[idx]);
+    
+    closePreview();
+
+    setTimeout(() => {
+        window.print();
+        container.innerHTML = '';
+    }, 500);
+}
+
+// 8. Tutup Modal
 function closePreview() {
     document.getElementById('preview-modal').style.display = 'none';
     document.getElementById('preview-area').innerHTML = ''; 
 }
 
-// 8. Tapis & Pilih Semua (Filter Functions)
+// 9. Tapis & Pilih Semua
 function filterData() {
     const group = document.getElementById('group-filter').value;
     document.querySelectorAll('.name-item').forEach(item => {
         const match = (group === "ALL" || item.getAttribute('data-group') === group);
         item.style.display = match ? "flex" : "none";
-        item.querySelector('input').checked = match;
+        // Automatik nyah-tanda (uncheck) jika tidak sepadan filter
+        if(!match) item.querySelector('input').checked = false;
     });
 }
 
@@ -168,5 +198,5 @@ function toggleAll(status) {
     });
 }
 
-// Jalankan loadData sebaik fail script.js dimuatkan
+// Muat data permulaan
 loadData();
