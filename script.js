@@ -1,6 +1,6 @@
 /**
  * SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Logik Utama: script.js
+ * Logik Utama: script.js (Updated with Live Control Panel)
  */
 
 let masterData = [];
@@ -19,7 +19,7 @@ async function loadData() {
     }
 }
 
-// 2. Papar senarai nama (Optimasi dengan map)
+// 2. Papar senarai nama
 function renderNameList(data) {
     const listDiv = document.getElementById('name-list');
     listDiv.innerHTML = data.map((item, index) => `
@@ -33,7 +33,42 @@ function renderNameList(data) {
     `).join('');
 }
 
-// 3. Template Sijil (Standard DRQ 2026)
+// 3. Live Control Panel HTML
+function injectControlPanel() {
+    return `
+        <div class="control-panel-live no-print" style="background:#f8f9fa; padding:20px; border:1px solid #ddd; border-radius:10px; margin-bottom:25px; width:100%; font-family:sans-serif; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <h4 style="margin-top:0; color:#333; border-bottom:2px solid #d4af37; padding-bottom:5px;">Kawalan Kekemasan Sijil</h4>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Saiz Logo: <span id="val-logo-size">140px</span></label>
+                    <input type="range" min="80" max="220" value="140" style="width:100%" oninput="updateLiveStyle('logo-size', this.value)">
+                </div>
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Lebar Khat: <span id="val-khat-width">620px</span></label>
+                    <input type="range" min="400" max="850" value="620" style="width:100%" oninput="updateLiveStyle('khat-width', this.value)">
+                </div>
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Saiz Nama: <span id="val-name-size">48px</span></label>
+                    <input type="range" min="20" max="80" value="48" style="width:100%" oninput="updateLiveStyle('name-size', this.value)">
+                </div>
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Jarak Kandungan: <span id="val-content-spacing">25px</span></label>
+                    <input type="range" min="5" max="80" value="25" style="width:100%" oninput="updateLiveStyle('content-spacing', this.value)">
+                </div>
+            </div>
+            <p style="font-size:11px; color:#666; margin-top:15px; font-style:italic;">*Pelarasan ini hanya untuk paparan cetakan semasa dan tidak mengubah fail asal.</p>
+        </div>
+    `;
+}
+
+// 4. Update CSS Variables secara Real-Time
+function updateLiveStyle(prop, value) {
+    document.documentElement.style.setProperty(`--${prop}`, value + 'px');
+    const label = document.getElementById(`val-${prop}`);
+    if(label) label.innerText = value + 'px';
+}
+
+// 5. Template Sijil
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -42,7 +77,6 @@ function createCertTemplate(item) {
                     <img src="logo_masjid.png" class="logo-left" alt="Logo Masjid">
                     <div class="header-text">
                         <img src="khatmklsb.png" class="mosque-name-logo" alt="Masjid Kampung Sungai Lang Baru">
-                        
                         <h1 class="title">Sijil Penyertaan</h1>
                         <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
                         <p class="sub-title">Dengan ini diperakukan bahawa</p>
@@ -73,12 +107,12 @@ function createCertTemplate(item) {
     `;
 }
 
-// 4. Logik Preview Individu
+// 6. Logik Preview Individu
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const confirmBtn = document.getElementById('modal-confirm-btn');
     
-    area.innerHTML = createCertTemplate(masterData[idx]);
+    area.innerHTML = injectControlPanel() + createCertTemplate(masterData[idx]);
     
     confirmBtn.onclick = function() {
         if(confirm("Cetak sijil untuk " + masterData[idx].nama + "?")) {
@@ -90,7 +124,7 @@ function showPreview(idx) {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 5. Pralihat Pukal
+// 7. Pralihat Pukal
 function generateAndPreviewBulk() {
     const area = document.getElementById('preview-area');
     const confirmBtn = document.getElementById('modal-confirm-btn');
@@ -98,7 +132,7 @@ function generateAndPreviewBulk() {
     
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
-    area.innerHTML = Array.from(checked).map((cb, index) => {
+    let certsContent = Array.from(checked).map((cb, index) => {
         const idx = cb.value;
         let html = createCertTemplate(masterData[idx]);
         if (index < checked.length - 1) {
@@ -106,6 +140,8 @@ function generateAndPreviewBulk() {
         }
         return html;
     }).join('');
+
+    area.innerHTML = injectControlPanel() + certsContent;
 
     confirmBtn.onclick = function() {
         if(confirm("Adakah anda pasti? Sila pastikan kertas sijil telah dimasukkan ke dalam pencetak.")) {
@@ -117,7 +153,7 @@ function generateAndPreviewBulk() {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 6. Eksekusi Cetakan
+// 8. Eksekusi Cetakan
 function executeFinalPrint() {
     const container = document.getElementById('certificate-container');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
@@ -140,7 +176,7 @@ function executeFinalPrint() {
     }, 1000);
 }
 
-// 7. Cetak Sijil Tunggal
+// 9. Cetak Sijil Tunggal
 function printSingleCert(idx) {
     const container = document.getElementById('certificate-container');
     container.innerHTML = createCertTemplate(masterData[idx]);
@@ -151,20 +187,18 @@ function printSingleCert(idx) {
     }, 500);
 }
 
-// 8. Tutup Modal
+// 10. Utiliti (Tutup, Tapis, Toggle)
 function closePreview() {
     document.getElementById('preview-modal').style.display = 'none';
     document.getElementById('preview-area').innerHTML = ''; 
 }
 
-// 9. Tapis & Pilih Semua
 function filterData() {
     const group = document.getElementById('group-filter').value;
     document.querySelectorAll('.name-item').forEach(item => {
         const itemGroup = item.getAttribute('data-group');
         const isMatch = (group === "ALL" || itemGroup === group);
         item.style.display = isMatch ? "flex" : "none";
-        // Hanya uncheck jika ia disembunyikan
         if(!isMatch) item.querySelector('input').checked = false;
     });
 }
