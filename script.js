@@ -36,7 +36,7 @@ function renderNameList(data) {
     });
 }
 
-// 3. Template Sijil (KEMASKINI: Tajuk di Atas & Info di Bawah)
+// 3. Template Sijil (KEMASKINI: Susunan Tajuk & Pengepala Baharu)
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -46,12 +46,11 @@ function createCertTemplate(item) {
                     <div class="header-text">
                         <p class="institution">MASJID KAMPUNG SUNGAI LANG BARU</p>
                         <h1 class="title">Sijil Penyertaan</h1>
+                        <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
                         <p class="sub-title">Dengan ini diperakukan bahawa</p>
                     </div>
                     <img src="logo_daurahquran.png" class="logo-right" alt="Logo Program">
                 </div>
-
-                <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
 
                 <div class="participant-name">${item.nama}</div>
                 <div class="participant-ic">No. K/P: ${item.ic}</div>
