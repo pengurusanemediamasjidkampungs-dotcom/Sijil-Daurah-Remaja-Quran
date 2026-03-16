@@ -192,7 +192,7 @@ body {
     flex: 1;
     display: flex;
     justify-content: center;
-    padding-right: 200px; /* Seimbangkan ruang logo kiri */
+    padding-right: 200px; /* Imbangi ruang logo kiri */
 }
 
 .sig-box {
@@ -300,6 +300,16 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         display: block !important;
+    }
+
+    /* KELAS PAGE BREAK UNTUK CETAKAN PUKAL */
+    .page-break {
+        display: block;
+        page-break-after: always;
+        break-after: page;
+        height: 0;
+        margin: 0;
+        border: none;
     }
 
     .no-print, 
