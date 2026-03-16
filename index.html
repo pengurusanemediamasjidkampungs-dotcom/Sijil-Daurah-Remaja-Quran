@@ -184,11 +184,17 @@
         <label style="display:block; margin-bottom: 10px;"><strong>4. Senarai Peserta (Klik nama untuk Pralihat):</strong></label>
         <div id="name-list" class="name-selector"></div>
 
-        <button class="action-btn" onclick="generateAndPreviewBulk()" style="background: #27ae60;">
-            👁️ PREVIEW SEMUA PILIHAN
-        </button>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <button class="action-btn" onclick="generateAndPreviewBulk()" style="background: #27ae60;">
+                👁️ PREVIEW SEMUA PILIHAN
+            </button>
+
+            <button class="action-btn" onclick="hantarSemuaPilihan()" style="background: #e67e22;">
+                🚀 AUTO-RUN KE TELEGRAM
+            </button>
+        </div>
         
-        <p id="status-text" style="font-size: 12px; color: #666;">Memuatkan data...</p>
+        <p id="status-text" style="font-size: 14px; font-weight: bold; color: #333; margin-top: 15px;">Memuatkan data...</p>
     </div>
 
     <div id="preview-modal" class="no-print">
