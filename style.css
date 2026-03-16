@@ -68,7 +68,7 @@ body {
 }
 
 .logo-left, .logo-right {
-    height: var(--logo-size) !important; /* Dikawal oleh Slider */
+    height: var(--logo-size) !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
@@ -84,7 +84,7 @@ body {
 
 .mosque-name-logo {
     height: auto; 
-    width: var(--khat-width) !important; /* Dikawal oleh Slider */
+    width: var(--khat-width) !important;
     max-width: 95%;
     margin-bottom: 15px;
     object-fit: contain;
@@ -92,15 +92,6 @@ body {
     filter: brightness(1) contrast(1.2);
     opacity: 1;
     mix-blend-mode: normal;
-}
-
-.institution { 
-    font-family: 'Open Sans', sans-serif; 
-    font-weight: 700; 
-    font-size: 18px; 
-    letter-spacing: 2px; 
-    margin: 0;
-    color: #1a1a1a;
 }
 
 .title { 
@@ -131,10 +122,10 @@ body {
 /* --- MAKLUMAT PESERTA --- */
 .participant-name {
     font-family: 'Open Sans', sans-serif;
-    font-size: var(--name-size) !important; /* Dikawal oleh Slider */
+    font-size: var(--name-size) !important;
     font-weight: 700;
     color: #1a1a1a;
-    margin-top: var(--content-spacing) !important; /* Dikawal oleh Slider */
+    margin-top: var(--content-spacing) !important;
     margin-bottom: 8px;
     border-bottom: 2.5px solid var(--gold);
     min-width: 700px;
@@ -151,13 +142,21 @@ body {
     margin-bottom: 15px; 
 }
 
+/* KEMASKINI: Jarak baris rapat & profesional untuk 2 baris */
 .program-info-final {
     font-family: 'Open Sans', sans-serif;
-    font-size: 20px; 
-    line-height: 1.8;
-    margin: var(--content-spacing) 0 !important; /* Dikawal oleh Slider */
+    font-size: 19px; 
+    line-height: 1.3; 
+    margin: var(--content-spacing) 0 !important;
     color: #333;
     max-width: 85%;
+    display: block;
+}
+
+/* Tambahan: Penekanan visual pada baris penganjur */
+.program-info-final br + text {
+    display: block;
+    margin-top: 2px;
 }
 
 /* --- TANDA TANGAN --- */
@@ -249,7 +248,7 @@ body {
     border-top: 2px dashed #ccc;
 }
 
-/* --- LOGIK CETAKAN (MENGATASI MASALAH 1 HALAMAN) --- */
+/* --- LOGIK CETAKAN --- */
 @media print {
     html, body {
         height: auto !important;
@@ -259,7 +258,7 @@ body {
 
     .no-print, 
     .control-panel, 
-    .control-panel-live, /* Sembunyikan Slider semasa cetak */
+    .control-panel-live,
     #preview-modal, 
     .close-btn, 
     .preview-tag, 
