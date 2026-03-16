@@ -1,6 +1,6 @@
 /**
  * LOGIK UTAMA - script.js
- * Fokus: Pengurusan Data, UI Control Panel, dan Integrasi Print Engine
+ * Fokus: Pengurusan Data, UI Control Panel, Integrasi Print Engine, dan Telegram Bot
  */
 
 let masterData = [];
@@ -28,22 +28,97 @@ function renderNameList(data) {
 
     listDiv.innerHTML = data.map((item, index) => `
         <div class="name-item" data-group="${item.kumpulan || 'ALL'}">
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                 <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
                 <label for="user-${index}">
                     <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
                     <br><small>${item.ic}</small>
                 </label>
             </div>
-            <button onclick="printSingleCertByIndex(${index})" class="no-print btn-quick-print">
-                CETAK 🖨️
-            </button>
+            <div class="action-buttons-list" style="display: flex; gap: 5px;">
+                <button onclick="printSingleCertByIndex(${index})" class="no-print btn-quick-print">
+                    CETAK 🖨️
+                </button>
+                <button onclick="hantarKeTelegramByIndex(${index})" class="no-print btn-quick-telegram" style="background: #0088cc; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                    BOT 🚀
+                </button>
+            </div>
         </div>
     `).join('');
 }
 
 /**
- * 2. LIVE CONTROL ENGINE
+ * 2. INTEGRASI TELEGRAM BOT (DIRECT PDF)
+ */
+async function hantarKeTelegram(peserta) {
+    // 1. Dapatkan elemen sijil
+    const certElement = document.querySelector('.certificate');
+    if (!certElement) {
+        alert("Sijil tidak dijumpai dalam DOM!");
+        return;
+    }
+
+    // 2. Kumpul gaya CSS (Penting untuk border emas & font)
+    const styles = Array.from(document.styleSheets)
+        .map(sheet => {
+            try {
+                return Array.from(sheet.cssRules).map(r => r.cssText).join('');
+            } catch (e) { return ''; }
+        }).join('');
+
+    // 3. Bina HTML penuh untuk dihantar ke Python
+    const fullHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                ${styles}
+                body { margin: 0; padding: 0; background: white; }
+                .certificate { 
+                    margin: 0 !important; 
+                    box-shadow: none !important; 
+                    transform: none !important; 
+                }
+            </style>
+        </head>
+        <body>
+            ${certElement.outerHTML}
+        </body>
+        </html>`;
+
+    // 4. Hantar ke API Python Flask
+    try {
+        const response = await fetch('http://localhost:5000/send_pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nama: peserta.nama,
+                html: fullHTML
+            })
+        });
+
+        const result = await response.json();
+        if (result.status === 'success') {
+            alert(`✅ Berjaya! Sijil ${peserta.nama} telah dihantar ke Telegram.`);
+        } else {
+            alert("❌ Ralat Server: " + result.message);
+        }
+    } catch (error) {
+        alert("⚠️ Ralat: Pastikan server Python (app.py) sedang berjalan di terminal!");
+    }
+}
+
+function hantarKeTelegramByIndex(idx) {
+    if(masterData[idx]) {
+        // Kita perlu render sekejap ke dalam elemen tersembunyi jika tiada preview terbuka
+        // Tetapi cara paling mudah: buka preview dan hantar.
+        showPreview(idx);
+        setTimeout(() => hantarKeTelegram(masterData[idx]), 500);
+    }
+}
+
+/**
+ * 3. LIVE CONTROL ENGINE
  */
 function updateLiveStyle(prop, value) {
     document.documentElement.style.setProperty(`--${prop}`, value + 'px');
@@ -78,18 +153,20 @@ function injectControlPanel() {
 }
 
 /**
- * 3. LOGIK MODAL & PREVIEW (DIKEMASKINI DENGAN BUTANG INDIVIDU)
+ * 4. LOGIK MODAL & PREVIEW
  */
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
     
-    // Paparan untuk seorang sahaja
     area.innerHTML = injectControlPanel() + `
         <div class="preview-item-container">
-            <div class="no-print" style="margin-bottom: 15px;">
+            <div class="no-print" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
                 <button onclick="printSingleCertByIndex(${idx})" class="action-btn" style="background:#27ae60; margin:0;">
-                    🖨️ CETAK SIJIL INI SAHAJA
+                    🖨️ CETAK FIZIKAL
+                </button>
+                <button onclick="hantarKeTelegram(masterData[${idx}])" class="action-btn" style="background:#0088cc; margin:0;">
+                    🚀 HANTAR KE TELEGRAM (PDF)
                 </button>
             </div>
             ${createCertTemplate(masterData[idx], currentOrientation)}
@@ -112,15 +189,18 @@ function generateAndPreviewBulk() {
     const modal = document.getElementById('preview-modal');
     const selectedData = Array.from(checked).map(cb => masterData[cb.value]);
 
-    // Bina kandungan: Setiap sijil ada butang cetak sendiri di atasnya
     let certsContent = selectedData.map((item) => {
         const originalIndex = masterData.indexOf(item);
         return `
             <div class="preview-item-container" style="width:100%; text-align:center; margin-bottom:80px; padding:20px; background:#f9f9f9; border-radius:10px;">
-                <div class="no-print" style="margin-bottom: 20px;">
+                <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
                     <button onclick="printSingleCertByIndex(${originalIndex})" 
-                            style="background:#2ecc71; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                        🖨️ CETAK SIJIL: ${item.nama}
+                            style="background:#2ecc71; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        🖨️ CETAK: ${item.nama}
+                    </button>
+                    <button onclick="hantarKeTelegram(masterData[${originalIndex}])" 
+                            style="background:#0088cc; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        🚀 HANTAR TELEGRAM
                     </button>
                 </div>
                 ${createCertTemplate(item, currentOrientation)}
@@ -131,7 +211,6 @@ function generateAndPreviewBulk() {
 
     area.innerHTML = injectControlPanel() + certsContent;
 
-    // Butang di bahagian bawah modal untuk cetak semua sekali
     document.getElementById('modal-confirm-btn').onclick = function() {
         if(confirm(`Cetak semua ${selectedData.length} sijil secara pukal?`)) {
             executeFinalPrint(selectedData, currentOrientation);
@@ -143,7 +222,7 @@ function generateAndPreviewBulk() {
 }
 
 /**
- * 4. FUNGSI HELPER CETAKAN
+ * 5. FUNGSI HELPER CETAKAN
  */
 function printSingleCertByIndex(idx) {
     if(masterData[idx]) {
@@ -152,7 +231,7 @@ function printSingleCertByIndex(idx) {
 }
 
 /**
- * 5. UTILITI UI (Filter, Toggle, Orientation)
+ * 6. UTILITI UI
  */
 function updateOrientation() {
     currentOrientation = document.getElementById('orientation-selector').value;
