@@ -58,40 +58,39 @@ body {
     text-align: center;
 }
 
-/* --- HEADER & LOGO --- */
-.header-with-logos {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 5px;
-}
-
-.logo-left, .logo-right {
-    height: var(--logo-size) !important;
-    width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
-}
-
-.header-text { 
-    flex-grow: 1; 
-    padding: 0 10px;
+/* --- HEADER BAHARU (LOGO MASJID CENTER ATAS) --- */
+.header-complete-center {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.logo-center-top {
+    height: 150px; 
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 15px;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
+}
+
+.header-text-only {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .mosque-name-logo {
     height: auto; 
     width: var(--khat-width) !important;
     max-width: 95%;
-    margin-bottom: 15px;
+    margin-bottom: 10px !important;
     object-fit: contain;
     background: transparent !important;
     filter: brightness(1) contrast(1.2);
-    opacity: 1;
-    mix-blend-mode: normal;
 }
 
 .title { 
@@ -120,6 +119,11 @@ body {
 }
 
 /* --- MAKLUMAT PESERTA --- */
+.participant-section {
+    width: 100%;
+    text-align: center;
+}
+
 .participant-name {
     font-family: 'Open Sans', sans-serif;
     font-size: var(--name-size) !important;
@@ -132,6 +136,7 @@ body {
     line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 1.5px;
+    display: inline-block;
 }
 
 .participant-ic { 
@@ -142,6 +147,7 @@ body {
     margin-bottom: 15px; 
 }
 
+/* --- TEKS PROGRAM (2 BARIS RAPAT) --- */
 .program-info-final {
     font-family: 'Open Sans', sans-serif;
     font-size: 19px; 
@@ -150,6 +156,7 @@ body {
     color: #333;
     max-width: 85%;
     display: block;
+    text-align: center;
 }
 
 .program-info-final br + text {
@@ -157,16 +164,38 @@ body {
     margin-top: 2px;
 }
 
-/* --- TANDA TANGAN --- */
-.signatures {
+/* --- FOOTER BAHARU (LOGO KIRI & TANDATANGAN) --- */
+.footer-section {
     margin-top: auto;
     width: 100%;
     display: flex;
-    justify-content: center; 
-    padding-bottom: 45px;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 20px;
 }
 
-.sig-wrapper {
+.logo-bottom-left-wrapper {
+    flex: 0 0 200px;
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 30px;
+}
+
+.logo-program-bottom {
+    height: 130px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
+}
+
+.signatures-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding-right: 200px; /* Seimbangkan ruang logo kiri */
+}
+
+.sig-box {
     position: relative;
     display: flex;
     flex-direction: column;
