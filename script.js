@@ -1,6 +1,6 @@
 /**
  * SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Logik Utama: script.js (Updated with Live Control Panel)
+ * Logik Utama: script.js (Updated with Professional Program Info)
  */
 
 let masterData = [];
@@ -68,7 +68,7 @@ function updateLiveStyle(prop, value) {
     if(label) label.innerText = value + 'px';
 }
 
-// 5. Template Sijil
+// 5. Template Sijil (KEMASKINI: Maklumat Program 2 Baris)
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -88,9 +88,8 @@ function createCertTemplate(item) {
                 <div class="participant-ic">No. K/P: ${item.ic}</div>
 
                 <div class="program-info-final">
-                    yang telah berlangsung sepanjang bulan <strong>Ramadhan 1447H</strong><br>
-                    bermula dari sesi 1 pada <strong>28 Februari 2026</strong> sehingga sesi 8 pada <strong>22 Mac 2026</strong><br>
-                    anjuran Masjid Kampung Sungai Lang Baru setiap hari Sabtu dan Ahad.
+                    yang telah berlangsung pada <strong>Ramadhan 1447H (28 Feb – 22 Mac 2026)</strong><br>
+                    anjuran Masjid Kampung Sungai Lang Baru.
                 </div>
 
                 <div class="signatures">
