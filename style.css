@@ -142,7 +142,6 @@ body {
     margin-bottom: 15px; 
 }
 
-/* KEMASKINI: Jarak baris rapat & profesional untuk 2 baris */
 .program-info-final {
     font-family: 'Open Sans', sans-serif;
     font-size: 19px; 
@@ -153,7 +152,6 @@ body {
     display: block;
 }
 
-/* Tambahan: Penekanan visual pada baris penganjur */
 .program-info-final br + text {
     display: block;
     margin-top: 2px;
@@ -231,6 +229,21 @@ body {
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
+/* --- FORMAT PORTRAIT --- */
+.certificate.portrait {
+    width: 210mm;
+    height: 297mm;
+}
+
+.certificate.portrait .content-overlay {
+    padding: 50px;
+}
+
+#preview-area .certificate.portrait {
+    transform: scale(0.4); 
+    margin-bottom: -150mm;
+}
+
 .preview-tag {
     background: var(--gold);
     color: white;
@@ -248,34 +261,34 @@ body {
     border-top: 2px dashed #ccc;
 }
 
-/* --- LOGIK CETAKAN --- */
+/* --- LOGIK CETAKAN DIPERBAIKI (FINAL) --- */
 @media print {
+    @page { size: auto; margin: 0; }
+
     html, body {
-        height: auto !important;
-        overflow: visible !important;
-        background: white !important;
+        background: none !important;
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
     }
 
     .no-print, 
     .control-panel, 
     .control-panel-live,
     #preview-modal, 
-    .close-btn, 
-    .preview-tag, 
     .preview-footer,
-    .preview-divider,
-    #preview-modal .modal-content > button { 
+    .preview-divider { 
         display: none !important; 
     }
 
     #certificate-container, 
     #preview-area {
         display: block !important;
-        height: auto !important;
-        overflow: visible !important;
-        position: static !important;
         width: 100% !important;
+        position: static !important;
         transform: none !important;
+        height: auto !important;
     }
 
     .certificate {
@@ -284,42 +297,33 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
-        width: 297mm !important;
+        border: none !important; 
+        width: 297mm !important; 
         height: 210mm !important;
-        page-break-after: always !important; 
+        page-break-after: always !important;
         page-break-inside: avoid !important;
+        break-after: page !important;
+        float: none !important;
+        overflow: hidden !important;
         transform: none !important;
+    }
+
+    .certificate.portrait {
+        width: 210mm !important;
+        height: 297mm !important;
+    }
+
+    .content-overlay {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        width: 100% !important;
+        background: var(--paper-white) !important;
+        -webkit-print-color-adjust: exact;
     }
 
     #preview-area .certificate {
         transform: none !important;
         margin-bottom: 0 !important;
-    }
-}
-
-/* --- FORMAT PORTRAIT --- */
-.certificate.portrait {
-    width: 210mm;
-    height: 297mm;
-}
-
-.certificate.portrait .content-overlay {
-    padding: 50px; /* Lebih ruang atas/bawah untuk portrait */
-}
-
-/* Laraskan skala pralihat untuk portrait agar muat dalam skrin */
-#preview-area .certificate.portrait {
-    transform: scale(0.4); 
-    margin-bottom: -150mm;
-}
-
-/* CSS Cetakan untuk Portrait */
-@media print {
-    @page { size: auto; margin: 0; }
-    
-    .certificate.portrait {
-        width: 210mm !important;
-        height: 297mm !important;
-        page-break-after: always !important;
     }
 }
