@@ -61,7 +61,15 @@ body {
     margin-bottom: 5px;
 }
 
-.logo-left, .logo-right {
+/* KEMASKINI: Saiz logo masjid (kiri) dibesarkan 20% */
+.logo-left {
+    height: 155px; 
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
+}
+
+.logo-right {
     height: 130px; 
     width: auto;
     object-fit: contain;
