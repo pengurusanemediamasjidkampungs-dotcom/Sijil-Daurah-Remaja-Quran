@@ -6,7 +6,8 @@
     --shadow: rgba(0, 0, 0, 0.2);
     
     /* Variable Dinamik untuk Control Panel */
-    --logo-size: 140px;
+    --logo-size: 140px;          /* Logo Masjid (Atas) */
+    --logo-program-size: 120px;  /* Logo Program (Bawah) */
     --khat-width: 620px;
     --name-size: 48px;
     --content-spacing: 25px;
@@ -42,6 +43,7 @@ body {
     border: 12px solid var(--gold);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     overflow: hidden;
+    display: block;
 }
 
 .content-overlay {
@@ -58,7 +60,7 @@ body {
     text-align: center;
 }
 
-/* --- HEADER BAHARU (LOGO MASJID CENTER ATAS) --- */
+/* --- HEADER (LOGO MASJID CENTER ATAS) --- */
 .header-complete-center {
     display: flex;
     flex-direction: column;
@@ -68,7 +70,6 @@ body {
 }
 
 .logo-center-top {
-    /* DIKEMASKINI: Menggunakan variable dinamik dari Control Panel */
     height: var(--logo-size) !important; 
     width: auto;
     object-fit: contain;
@@ -91,7 +92,6 @@ body {
     margin-bottom: 10px !important;
     object-fit: contain;
     background: transparent !important;
-    filter: brightness(1) contrast(1.2);
 }
 
 .title { 
@@ -138,7 +138,7 @@ body {
     margin-bottom: 15px; 
 }
 
-/* --- TEKS PROGRAM (SUSUNAN 6 BARIS) --- */
+/* --- TEKS PROGRAM --- */
 .program-info-final {
     font-family: 'Open Sans', sans-serif;
     font-size: 17px; 
@@ -147,10 +147,9 @@ body {
     color: #333;
     max-width: 85%;
     display: block;
-    text-align: center;
 }
 
-/* --- FOOTER BAHARU (DIKEMASKINI UNTUK KEMAS) --- */
+/* --- FOOTER (LOGO PROGRAM & TANDATANGAN) --- */
 .footer-section {
     margin-top: auto;
     width: 100%;
@@ -168,7 +167,8 @@ body {
 }
 
 .logo-program-bottom {
-    height: 120px;
+    /* DIKEMASKINI: Menggunakan variable khusus logo kedua */
+    height: var(--logo-program-size) !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
@@ -206,7 +206,6 @@ body {
     color: #1a1a1a;
     text-align: center;
     line-height: 1.4;
-    font-family: 'Open Sans', sans-serif;
 }
 
 /* --- PENYELARASAN MODAL PREVIEW --- */
@@ -228,20 +227,19 @@ body {
     margin: 20px auto; 
     padding: 25px; 
     width: 95%; 
-    max-width: 1200px;
+    max-width: 1250px;
     border-radius: 12px; 
     position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+/* Kawalan Skala Sijil di skrin (bukan waktu cetak) */
 #preview-area .certificate {
-    transform: scale(0.5);
+    transform: scale(0.6);
     transform-origin: top center;
-    margin-bottom: -100mm; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    margin-bottom: -80mm; 
 }
 
 /* --- FORMAT PORTRAIT --- */
@@ -250,33 +248,20 @@ body {
     height: 297mm;
 }
 
-.certificate.portrait .content-overlay {
-    padding: 50px;
-}
-
 #preview-area .certificate.portrait {
-    transform: scale(0.4); 
+    transform: scale(0.45); 
     margin-bottom: -150mm;
-}
-
-.preview-tag {
-    background: var(--gold);
-    color: white;
-    padding: 5px 15px;
-    border-radius: 5px;
-    font-weight: bold;
-    margin-bottom: 15px;
 }
 
 .preview-divider {
     display: block;
-    width: 80%;
-    margin: 20px auto;
+    width: 100%;
+    margin: 40px 0;
     border: none;
     border-top: 2px dashed #ccc;
 }
 
-/* --- LOGIK CETAKAN DIPERBAIKI (FINAL) --- */
+/* --- LOGIK CETAKAN (FINAL) --- */
 @media print {
     @page { size: auto; margin: 0; }
 
@@ -288,31 +273,18 @@ body {
         display: block !important;
     }
 
-    .page-break {
-        display: block;
-        page-break-after: always;
-        break-after: page;
-        height: 0;
-        margin: 0;
-        border: none;
-    }
-
     .no-print, 
-    .control-panel, 
     .control-panel-live,
     #preview-modal, 
-    .preview-footer,
     .preview-divider { 
         display: none !important; 
     }
 
-    #certificate-container, 
-    #preview-area {
+    #certificate-container {
         display: block !important;
         width: 100% !important;
-        position: static !important;
-        transform: none !important;
-        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .certificate {
@@ -326,10 +298,8 @@ body {
         height: 210mm !important;
         page-break-after: always !important;
         page-break-inside: avoid !important;
-        break-after: page !important;
-        float: none !important;
         overflow: hidden !important;
-        transform: none !important;
+        transform: none !important; /* Wajib matikan transform masa cetak */
     }
 
     .certificate.portrait {
@@ -338,16 +308,6 @@ body {
     }
 
     .content-overlay {
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100% !important;
-        width: 100% !important;
         background: var(--paper-white) !important;
-        -webkit-print-color-adjust: exact;
-    }
-
-    #preview-area .certificate {
-        transform: none !important;
-        margin-bottom: 0 !important;
     }
 }
