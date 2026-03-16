@@ -51,8 +51,9 @@ function renderNameList(data) {
  * 2. INTEGRASI TELEGRAM BOT (BROWSER-SIDE PDF GENERATION)
  */
 async function hantarKeTelegram(peserta) {
+    // Cari elemen sijil yang sedang aktif di skrin
     const element = document.querySelector('.certificate');
-    if (!element) return alert("Sijil tidak dijumpai!");
+    if (!element) return { status: 'error', message: 'Sijil tidak dijumpai!' };
 
     const opt = {
         margin: 0,
@@ -73,8 +74,7 @@ async function hantarKeTelegram(peserta) {
             body: formData 
         });
 
-        const result = await response.json();
-        return result; // Pulangkan result untuk kegunaan fungsi bulk
+        return await response.json();
     } catch (error) {
         console.error(error);
         throw error;
@@ -91,7 +91,7 @@ function hantarKeTelegramByIndex(idx) {
             } catch (e) {
                 alert("⚠️ Gagal menghantar. Semak console.");
             }
-        }, 800);
+        }, 1000); // Beri masa lebih lama untuk render
     }
 }
 
@@ -205,8 +205,7 @@ function closePreview() {
 }
 
 /**
- * 7. AUTO-RUN BULK TELEGRAM
- * Mengambil semua yang di-check dan hantar satu-persatu ke Bot
+ * 7. AUTO-RUN BULK TELEGRAM (VERSI ANTI-NAMA-SAMA)
  */
 async function hantarSemuaPilihan() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
@@ -215,7 +214,6 @@ async function hantarSemuaPilihan() {
     const sahkan = confirm(`Hantar ${checked.length} sijil secara automatik?`);
     if (!sahkan) return;
 
-    // Persediaan UI
     const statusText = document.getElementById('status-text');
     const btnAsal = event.target;
     btnAsal.disabled = true;
@@ -228,24 +226,29 @@ async function hantarSemuaPilihan() {
         statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
 
         try {
-            // Tukar preview ke peserta semasa supaya html2pdf ambil data yang betul
+            // 1. Paksa modal buka dan render template spesifik peserta ini (UTAMA)
             showPreview(idx);
             
-            // Tunggu 1 saat untuk pastikan CSS/Foto dimuatkan
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // 2. Beri masa 1.5 saat untuk pastikan DOM betul-betul sudah bertukar nama
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
-            // Jana dan hantar
-            await hantarKeTelegram(peserta);
-            console.log(`Berjaya: ${peserta.nama}`);
+            // 3. Jalankan penghantaran (Fungsi ini akan cari elemen .certificate yang baru di-render)
+            const res = await hantarKeTelegram(peserta);
+            
+            if(res.status === 'success') {
+                console.log(`Berjaya: ${peserta.nama}`);
+            } else {
+                console.error(`Ralat server untuk ${peserta.nama}: ${res.message}`);
+            }
         } catch (err) {
-            console.error(`Gagal: ${peserta.nama}`, err);
+            console.error(`Gagal teknikal: ${peserta.nama}`, err);
         }
     }
 
-    statusText.innerText = `✅ Selesai! ${checked.length} sijil telah dihantar.`;
+    statusText.innerText = `✅ Selesai! ${checked.length} sijil unik dihantar.`;
     btnAsal.disabled = false;
     btnAsal.innerText = "🚀 AUTO-RUN KE TELEGRAM";
-    alert("Semua sijil telah berjaya diproses!");
+    alert("Proses Bulk Selesai. Sila semak Bot Telegram anda.");
 }
 
 // Inisialisasi
