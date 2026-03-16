@@ -1,6 +1,6 @@
 /**
  * SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Logik Utama: script.js (Updated with Portrait Orientation Support)
+ * Logik Utama: script.js (Updated with New Layout & Portrait Support)
  */
 
 let masterData = [];
@@ -71,8 +71,6 @@ function updateLiveStyle(prop, value) {
 
 function updateOrientation() {
     currentOrientation = document.getElementById('orientation-selector').value;
-    
-    // Kemaskini semua elemen sijil yang ada dalam DOM (terutama dalam preview)
     const certs = document.querySelectorAll('.certificate');
     certs.forEach(c => {
         if(currentOrientation === 'portrait') {
@@ -83,38 +81,45 @@ function updateOrientation() {
     });
 }
 
-// 5. Template Sijil (KEMASKINI: Sokongan Portrait Dinamik)
+// 5. Template Sijil (KEMASKINI: Layout Baharu - Logo Masjid Atas, Logo Program Kiri Bawah)
 function createCertTemplate(item) {
     const portraitClass = (currentOrientation === 'portrait') ? 'portrait' : '';
     
     return `
         <div class="certificate ${portraitClass}">
             <div class="content-overlay">
-                <div class="header-with-logos">
-                    <img src="logo_masjid.png" class="logo-left" alt="Logo Masjid">
-                    <div class="header-text">
+                <div class="header-complete-center">
+                    <img src="logo_masjid.png" class="logo-center-top" alt="Logo Masjid">
+                    <div class="header-text-only">
                         <img src="khatmklsb.png" class="mosque-name-logo" alt="Masjid Kampung Sungai Lang Baru">
                         <h1 class="title">Sijil Penyertaan</h1>
                         <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
                         <p class="sub-title">Dengan ini diperakukan bahawa</p>
                     </div>
-                    <img src="logo_daurahquran.png" class="logo-right" alt="Logo Program">
                 </div>
 
-                <div class="participant-name">${item.nama}</div>
-                <div class="participant-ic">No. K/P: ${item.ic}</div>
+                <div class="participant-section">
+                    <div class="participant-name">${item.nama}</div>
+                    <div class="participant-ic">No. K/P: ${item.ic}</div>
+                </div>
 
                 <div class="program-info-final">
                     yang telah berlangsung pada <strong>Ramadhan 1447H (28 Feb – 22 Mac 2026)</strong><br>
                     anjuran Masjid Kampung Sungai Lang Baru.
                 </div>
 
-                <div class="signatures">
-                    <div class="sig-wrapper">
-                        <img src="tandatangannazir.png" class="signature-img">
-                        <div class="sig-line single-sig">
-                            <strong>( NAZIR MASJID )</strong><br>
-                            Masjid Kampung Sungai Lang Baru
+                <div class="footer-section">
+                    <div class="logo-bottom-left-wrapper">
+                        <img src="logo_daurahquran.png" class="logo-program-bottom" alt="Logo Program">
+                    </div>
+                    
+                    <div class="signatures-wrapper">
+                        <div class="sig-box">
+                            <img src="tandatangannazir.png" class="signature-img">
+                            <div class="sig-line single-sig">
+                                <strong>( NAZIR MASJID )</strong><br>
+                                Masjid Kampung Sungai Lang Baru
+                            </div>
                         </div>
                     </div>
                 </div>
