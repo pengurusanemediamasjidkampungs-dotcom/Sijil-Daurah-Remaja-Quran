@@ -4,6 +4,12 @@
     --dark-gold: #996515;
     --paper-white: rgba(255, 253, 240, 0.94);
     --shadow: rgba(0, 0, 0, 0.2);
+    
+    /* Variable Dinamik untuk Control Panel */
+    --logo-size: 140px;
+    --khat-width: 620px;
+    --name-size: 48px;
+    --content-spacing: 25px;
 }
 
 * {
@@ -61,15 +67,8 @@ body {
     margin-bottom: 5px;
 }
 
-.logo-left {
-    height: 155px; 
-    width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
-}
-
-.logo-right {
-    height: 130px; 
+.logo-left, .logo-right {
+    height: var(--logo-size) !important; /* Dikawal oleh Slider */
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
@@ -83,10 +82,9 @@ body {
     align-items: center;
 }
 
-/* KEMASKINI: Melebarkan khat dan mengekalkan warna hitam asal */
 .mosque-name-logo {
     height: auto; 
-    width: 620px; /* Sejajar dengan lebar 'SIJIL PENYERTAAN' */
+    width: var(--khat-width) !important; /* Dikawal oleh Slider */
     max-width: 95%;
     margin-bottom: 15px;
     object-fit: contain;
@@ -130,12 +128,13 @@ body {
     text-transform: uppercase;
 }
 
+/* --- MAKLUMAT PESERTA --- */
 .participant-name {
     font-family: 'Open Sans', sans-serif;
-    font-size: 48px; 
+    font-size: var(--name-size) !important; /* Dikawal oleh Slider */
     font-weight: 700;
     color: #1a1a1a;
-    margin-top: 25px; 
+    margin-top: var(--content-spacing) !important; /* Dikawal oleh Slider */
     margin-bottom: 8px;
     border-bottom: 2.5px solid var(--gold);
     min-width: 700px;
@@ -156,11 +155,12 @@ body {
     font-family: 'Open Sans', sans-serif;
     font-size: 20px; 
     line-height: 1.8;
-    margin: 25px 0;
+    margin: var(--content-spacing) 0 !important; /* Dikawal oleh Slider */
     color: #333;
     max-width: 85%;
 }
 
+/* --- TANDA TANGAN --- */
 .signatures {
     margin-top: auto;
     width: 100%;
@@ -259,6 +259,7 @@ body {
 
     .no-print, 
     .control-panel, 
+    .control-panel-live, /* Sembunyikan Slider semasa cetak */
     #preview-modal, 
     .close-btn, 
     .preview-tag, 
@@ -288,7 +289,7 @@ body {
         height: 210mm !important;
         page-break-after: always !important; 
         page-break-inside: avoid !important;
-        transform: none !important; /* Batalkan scale(0.5) preview */
+        transform: none !important;
     }
 
     #preview-area .certificate {
