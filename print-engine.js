@@ -69,7 +69,10 @@ function executeFinalPrint(selectedData, orientation) {
     const container = document.getElementById('certificate-container');
     if (!container) return alert("Ralat: Container cetakan tidak dijumpai!");
 
-    // Bina semua sijil dengan Page Break di antaranya
+    // 1. Bersihkan sisa data lama sebelum mula proses berat
+    container.innerHTML = ''; 
+
+    // 2. Bina semua sijil dengan Page Break
     const content = selectedData.map((item, index) => {
         let html = createCertTemplate(item, orientation);
         if (index < selectedData.length - 1) {
@@ -78,33 +81,45 @@ function executeFinalPrint(selectedData, orientation) {
         return html;
     }).join('');
 
-    // Masukkan ke dalam DOM
+    // 3. Masukkan ke dalam DOM
     container.innerHTML = content;
 
-    // Tunggu render selesai (2 saat) sebelum panggil dialog cetakan
+    // 4. Tunggu render imej selesai (2 saat) sebelum cetak
     setTimeout(() => { 
         window.print(); 
         
-        // Kosongkan semula container selepas dialog cetakan ditutup (opsional)
+        // 5. Kosongkan semula selepas dialog cetakan keluar untuk jimat RAM
         setTimeout(() => { 
             container.innerHTML = ''; 
-        }, 1000);
+        }, 2000);
     }, 2000); 
 }
 
 /**
- * 3. Fungsi Cetakan Tunggal (Single Print)
- * Digunakan apabila klik butang cetak pada mod pralihat individu.
+ * 3. Fungsi Cetakan Tunggal (Single Print) - DIKEMASKINI
+ * Fokus: Kelajuan render tinggi dan pembersihan memori pantas.
  */
 function printSingleCert(item, orientation) {
     const container = document.getElementById('certificate-container');
     if (!container) return;
     
+    // 1. Bersihkan container serta-merta (Pembersihan memori awal)
+    container.innerHTML = ''; 
+    
+    // 2. Masukkan template sijil tunggal
     container.innerHTML = createCertTemplate(item, orientation);
     
-    // Masa menunggu lebih singkat untuk satu sijil
+    // 3. Delay pendek (500ms) untuk memastikan browser sempat memuatkan logo/imej
     setTimeout(() => {
         window.print();
-        container.innerHTML = '';
+        
+        /**
+         * 4. Pembersihan Memori Pantas
+         * Kita gunakan delay 1 saat supaya proses penghantaran data ke 'print spooler' 
+         * printer tidak terganggu sebelum container dikosongkan.
+         */
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 1000);
     }, 500);
 }
