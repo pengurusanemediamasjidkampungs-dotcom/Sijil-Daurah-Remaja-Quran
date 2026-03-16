@@ -207,7 +207,8 @@ body {
     background: #fff; 
     margin: 20px auto; 
     padding: 25px; 
-    width: fit-content; 
+    width: 95%; /* Diubah kepada 95% untuk paparan pukal lebih luas */
+    max-width: 1200px;
     border-radius: 12px; 
     position: relative;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -220,7 +221,7 @@ body {
 #preview-area .certificate {
     transform: scale(0.5);
     transform-origin: top center;
-    margin-bottom: -105mm; /* Tarik elemen bawah naik ke atas selepas scale */
+    margin-bottom: -100mm; /* Laraskan sedikit supaya divider nampak kemas */
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
@@ -231,6 +232,15 @@ body {
     border-radius: 5px;
     font-weight: bold;
     margin-bottom: 15px;
+}
+
+/* Gaya untuk pembahagi dalam modal preview */
+.preview-divider {
+    display: block;
+    width: 80%;
+    margin: 20px auto;
+    border: none;
+    border-top: 2px dashed #ccc;
 }
 
 /* --- LOGIK CETAKAN (PENTING) --- */
@@ -247,7 +257,8 @@ body {
     #preview-modal, 
     .close-btn, 
     .preview-tag, 
-    .preview-footer { 
+    .preview-footer,
+    .preview-divider { /* Sembunyikan divider pralihat semasa cetak */
         display: none !important; 
     }
 
@@ -263,8 +274,8 @@ body {
     .certificate {
         margin: 0 !important;
         box-shadow: none !important;
-        border: 12px solid var(--gold) !important; /* Kekalkan border emas */
-        page-break-after: always !important; /* Sijil seterusnya di page baru */
+        border: 12px solid var(--gold) !important; 
+        page-break-after: always !important; 
         page-break-inside: avoid !important;
         width: 297mm;
         height: 210mm;
