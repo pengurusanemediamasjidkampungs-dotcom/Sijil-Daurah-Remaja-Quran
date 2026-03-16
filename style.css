@@ -119,37 +119,25 @@ body {
     margin-bottom: 12px; 
 }
 
-/* --- INFO PROGRAM --- */
-.program-info { 
+/* --- INFO PROGRAM (VERSI KEMASKINI TANPA JADUAL) --- */
+.program-info-new {
     font-family: 'Open Sans', sans-serif;
-    font-size: 16px; 
-    line-height: 1.5; 
-    margin-bottom: 15px; 
+    font-size: 20px; 
+    line-height: 1.8;
+    margin: 30px 0;
+    color: #333;
+    max-width: 85%;
 }
 
-.program-name { 
-    font-weight: 700; 
-    font-size: 24px; 
-    color: var(--dark-gold); 
-    display: block; 
-    margin-top: 5px; 
-    letter-spacing: 1px;
-}
-
-/* --- JADUAL SESI --- */
-.sessions-grid {
-    width: 85%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-bottom: 20px;
-    font-family: 'Open Sans', sans-serif;
-}
-
-.sessions-grid td {
-    border: 1px solid var(--gold);
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.4);
-    font-weight: 600;
+.program-name-large {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--dark-gold);
+    display: block;
+    margin-top: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 /* --- TANDA TANGAN --- */
@@ -158,7 +146,7 @@ body {
     width: 100%;
     display: flex;
     justify-content: center; 
-    padding-bottom: 10px;
+    padding-bottom: 40px; /* Jarak bawah ditambah supaya nampak stabil */
 }
 
 .sig-wrapper {
@@ -207,7 +195,7 @@ body {
     background: #fff; 
     margin: 20px auto; 
     padding: 25px; 
-    width: 95%; /* Diubah kepada 95% untuk paparan pukal lebih luas */
+    width: 95%; 
     max-width: 1200px;
     border-radius: 12px; 
     position: relative;
@@ -217,11 +205,10 @@ body {
     align-items: center;
 }
 
-/* Skala sijil dalam modal supaya muat di skrin laptop */
 #preview-area .certificate {
     transform: scale(0.5);
     transform-origin: top center;
-    margin-bottom: -100mm; /* Laraskan sedikit supaya divider nampak kemas */
+    margin-bottom: -100mm; 
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
@@ -234,7 +221,6 @@ body {
     margin-bottom: 15px;
 }
 
-/* Gaya untuk pembahagi dalam modal preview */
 .preview-divider {
     display: block;
     width: 80%;
@@ -245,7 +231,6 @@ body {
 
 /* --- LOGIK CETAKAN (PENTING) --- */
 @media print {
-    /* 1. Sembunyikan elemen yang tidak perlu */
     body { 
         background: white !important; 
         padding: 0 !important; 
@@ -258,11 +243,10 @@ body {
     .close-btn, 
     .preview-tag, 
     .preview-footer,
-    .preview-divider { /* Sembunyikan divider pralihat semasa cetak */
+    .preview-divider { 
         display: none !important; 
     }
 
-    /* 2. Pastikan hanya bekas sijil sahaja yang muncul */
     #certificate-container {
         display: block !important;
         width: 100% !important;
@@ -270,7 +254,6 @@ body {
         padding: 0 !important;
     }
 
-    /* 3. Tetapan setiap keping sijil */
     .certificate {
         margin: 0 !important;
         box-shadow: none !important;
@@ -281,7 +264,6 @@ body {
         height: 210mm;
     }
 
-    /* Pastikan pemisah muka surat berfungsi secara paksa */
     .page-break { 
         display: block; 
         page-break-before: always !important; 
