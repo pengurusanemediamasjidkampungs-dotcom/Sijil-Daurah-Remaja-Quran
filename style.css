@@ -108,16 +108,6 @@ body {
     font-style: italic;
 }
 
-.program-name-top {
-    font-family: 'Playfair Display', serif;
-    font-weight: 800;
-    font-size: 28px; 
-    color: var(--dark-gold);
-    margin: 0 0 10px 0;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-}
-
 /* --- MAKLUMAT PESERTA --- */
 .participant-section {
     width: 100%;
@@ -147,42 +137,37 @@ body {
     margin-bottom: 15px; 
 }
 
-/* --- TEKS PROGRAM (2 BARIS RAPAT) --- */
+/* --- TEKS PROGRAM (SUSUNAN 6 BARIS) --- */
 .program-info-final {
     font-family: 'Open Sans', sans-serif;
-    font-size: 19px; 
-    line-height: 1.3; 
-    margin: var(--content-spacing) 0 !important;
+    font-size: 17px; 
+    line-height: 1.5; 
+    margin: 15px 0 !important;
     color: #333;
     max-width: 85%;
     display: block;
     text-align: center;
 }
 
-.program-info-final br + text {
-    display: block;
-    margin-top: 2px;
-}
-
-/* --- FOOTER BAHARU (LOGO KIRI & TANDATANGAN) --- */
+/* --- FOOTER BAHARU (DIKEMASKINI UNTUK KEMAS) --- */
 .footer-section {
     margin-top: auto;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-bottom: 20px;
+    padding-bottom: 25px; /* Jarak dari frame bawah */
 }
 
 .logo-bottom-left-wrapper {
-    flex: 0 0 200px;
+    flex: 0 0 250px; /* Lebarkan ruang logo untuk keseimbangan */
     display: flex;
-    justify-content: flex-start;
-    padding-left: 30px;
+    justify-content: center;
+    padding-left: 20px;
 }
 
 .logo-program-bottom {
-    height: 130px;
+    height: 120px;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
@@ -192,7 +177,8 @@ body {
     flex: 1;
     display: flex;
     justify-content: center;
-    padding-right: 200px; /* Imbangi ruang logo kiri */
+    /* Margin-right separuh dari lebar logo wrapper untuk paksi tengah yang tepat */
+    margin-right: 125px; 
 }
 
 .sig-box {
@@ -200,7 +186,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 380px;
+    width: 400px;
 }
 
 .signature-img {
@@ -302,7 +288,6 @@ body {
         display: block !important;
     }
 
-    /* KELAS PAGE BREAK UNTUK CETAKAN PUKAL */
     .page-break {
         display: block;
         page-break-after: always;
