@@ -27,7 +27,7 @@ body {
     width: 297mm;
     height: 210mm;
     background-color: #fffdf0;
-    background-image: url('image_24ecda.jpg'); /* Pastikan fail imej ini wujud */
+    background-image: url('image_24ecda.jpg');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -61,7 +61,6 @@ body {
     margin-bottom: 5px;
 }
 
-/* Saiz logo masjid (kiri) */
 .logo-left {
     height: 155px; 
     width: auto;
@@ -69,7 +68,6 @@ body {
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
 }
 
-/* Saiz logo program (kanan) */
 .logo-right {
     height: 130px; 
     width: auto;
@@ -88,15 +86,12 @@ body {
 /* KEMASKINI: Melebarkan khat dan mengekalkan warna hitam asal */
 .mosque-name-logo {
     height: auto; 
-    width: 620px; /* Lebar dilaraskan supaya sejajar dengan 'SIJIL PENYERTAAN' */
+    width: 620px; /* Sejajar dengan lebar 'SIJIL PENYERTAAN' */
     max-width: 95%;
     margin-bottom: 15px;
     object-fit: contain;
     background: transparent !important;
-    
-    /* Menggunakan warna asal hitam dengan ketajaman tinggi */
     filter: brightness(1) contrast(1.2);
-    
     opacity: 1;
     mix-blend-mode: normal;
 }
@@ -125,7 +120,6 @@ body {
     font-style: italic;
 }
 
-/* --- TAJUK PROGRAM (DI ATAS NAMA) --- */
 .program-name-top {
     font-family: 'Playfair Display', serif;
     font-weight: 800;
@@ -136,7 +130,6 @@ body {
     text-transform: uppercase;
 }
 
-/* --- MAKLUMAT PESERTA --- */
 .participant-name {
     font-family: 'Open Sans', sans-serif;
     font-size: 48px; 
@@ -159,7 +152,6 @@ body {
     margin-bottom: 15px; 
 }
 
-/* --- INFO PROGRAM DI BAWAH NAMA --- */
 .program-info-final {
     font-family: 'Open Sans', sans-serif;
     font-size: 20px; 
@@ -169,7 +161,6 @@ body {
     max-width: 85%;
 }
 
-/* --- TANDA TANGAN --- */
 .signatures {
     margin-top: auto;
     width: 100%;
@@ -258,43 +249,50 @@ body {
     border-top: 2px dashed #ccc;
 }
 
-/* --- LOGIK CETAKAN (PENTING) --- */
+/* --- LOGIK CETAKAN (MENGATASI MASALAH 1 HALAMAN) --- */
 @media print {
-    body { 
-        background: white !important; 
-        padding: 0 !important; 
-        margin: 0 !important; 
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: white !important;
     }
-    
+
     .no-print, 
     .control-panel, 
     #preview-modal, 
     .close-btn, 
     .preview-tag, 
     .preview-footer,
-    .preview-divider { 
+    .preview-divider,
+    #preview-modal .modal-content > button { 
         display: none !important; 
     }
 
-    #certificate-container {
+    #certificate-container, 
+    #preview-area {
         display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: static !important;
         width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        transform: none !important;
     }
 
     .certificate {
+        display: block !important;
+        position: relative !important;
         margin: 0 !important;
+        padding: 0 !important;
         box-shadow: none !important;
-        border: 12px solid var(--gold) !important; 
+        width: 297mm !important;
+        height: 210mm !important;
         page-break-after: always !important; 
         page-break-inside: avoid !important;
-        width: 297mm;
-        height: 210mm;
+        transform: none !important; /* Batalkan scale(0.5) preview */
     }
 
-    .page-break { 
-        display: block; 
-        page-break-before: always !important; 
+    #preview-area .certificate {
+        transform: none !important;
+        margin-bottom: 0 !important;
     }
 }
