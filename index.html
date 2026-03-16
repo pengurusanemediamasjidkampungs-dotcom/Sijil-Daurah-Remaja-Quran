@@ -7,7 +7,7 @@
     
     <link rel="stylesheet" href="style.css">
     
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     
     <style>
         /* Gaya tambahan untuk susun atur panel kawalan (Hanya untuk paparan skrin) */
@@ -60,7 +60,6 @@
                 cursor: pointer; 
             }
             .action-btn { 
-                background: #27ae60; 
                 color: white; 
                 border: none; 
                 padding: 12px 30px; 
@@ -79,6 +78,18 @@
                 font-size: 28px; 
                 cursor: pointer; 
                 font-weight: bold; 
+                z-index: 10001;
+            }
+            
+            /* Footer dalam modal untuk pengesahan */
+            .preview-footer {
+                margin-top: 20px;
+                padding: 20px;
+                border-top: 2px solid #ddd;
+                width: 100%;
+                background: #f9f9f9;
+                text-align: center;
+                border-radius: 0 0 12px 12px;
             }
         }
     </style>
@@ -86,7 +97,7 @@
 <body>
 
     <div class="no-print control-panel">
-        <h2 style="margin-top:0;">Sistem Cetakan Sijil Daurah 2026</h2>
+        <h2 style="margin-top:0; font-family: 'Cinzel', serif; color: #996515;">Sistem Cetakan Sijil Daurah 2026</h2>
         
         <div class="filter-section">
             <div>
@@ -108,21 +119,34 @@
         <label><strong>3. Klik Nama untuk Preview | Tanda untuk Cetak:</strong></label>
         <div id="name-list" class="name-selector"></div>
 
-        <button class="action-btn" onclick="generateAndPrint()">CETAK PUKAL (TERPILIH)</button>
+        <button class="action-btn" onclick="generateAndPreviewBulk()" style="background: #27ae60;">
+            👁️ PREVIEW SEMUA PILIHAN
+        </button>
+        
         <p id="status-text" style="font-size: 12px; color: #666;">Memuatkan data...</p>
     </div>
 
-    <div id="preview-modal">
+    <div id="preview-modal" class="no-print">
         <div class="modal-content">
             <span class="close-btn" onclick="closePreview()">&times;</span>
-            <span class="preview-tag">PRATONTON SIJIL</span>
+            <div class="preview-tag">PRALIHAT DOKUMEN (PENGESAHAN)</div>
             
             <div id="preview-area"></div>
 
-            <div style="margin-top: 20px; padding: 20px; border-top: 1px solid #eee; width: 100%; text-align: center;">
-                <button class="action-btn" id="modal-print-btn" style="background: #27ae60; width: 300px;">
-                    CETAK SIJIL INI (PDF)
-                </button>
+            <div class="preview-footer">
+                <p style="margin-bottom: 15px; color: #444; font-weight: 600;">
+                    Sila semak semua ejaan nama dan nombor kad pengenalan sebelum mencetak.
+                </p>
+                
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="modal-confirm-btn" class="action-btn" style="background: #c0392b; width: 350px; margin-top: 0;">
+                        ✅ SAHKAN & CETAK SEKARANG
+                    </button>
+                    
+                    <button onclick="closePreview()" class="action-btn" style="background: #7f8c8d; margin-top: 0;">
+                        BATAL
+                    </button>
+                </div>
             </div>
         </div>
     </div>
