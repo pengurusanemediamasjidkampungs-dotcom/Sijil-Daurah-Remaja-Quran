@@ -251,7 +251,7 @@ body {
 #preview-area .certificate {
     transform: scale(0.6);
     transform-origin: top center;
-    margin-bottom: -75mm; /* Melaraskan ruang selepas scale */
+    margin-bottom: -75mm; 
 }
 
 /* --- FORMAT PORTRAIT --- */
@@ -316,13 +316,18 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
-        border: none !important; 
+        
+        /* LOGIK SAFE BORDER: Memaksa border muncul walaupun margin printer terpotong */
+        border: 12mm solid #d4af37 !important; 
+        box-shadow: inset 0 0 0 2px #996515 !important;
+        
         width: 297mm !important; 
         height: 210mm !important;
         page-break-after: always !important;
         page-break-inside: avoid !important;
         overflow: hidden !important;
-        transform: none !important; /* Wajib matikan transform masa cetak */
+        transform: none !important; 
+        -webkit-print-color-adjust: exact !important;
     }
 
     .certificate.portrait {
