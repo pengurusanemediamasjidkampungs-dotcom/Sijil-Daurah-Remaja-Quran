@@ -1,6 +1,6 @@
 /**
  * SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Logik Utama: script.js (Updated with Stabilized Bulk Print)
+ * Logik Utama: script.js (Updated with New 6-Line Text Layout & Stabilized Print)
  */
 
 let masterData = [];
@@ -81,7 +81,7 @@ function updateOrientation() {
     });
 }
 
-// 5. Template Sijil
+// 5. Template Sijil (KEMASKINI: Susunan Teks 6 Baris & Footer Kemas)
 function createCertTemplate(item) {
     const portraitClass = (currentOrientation === 'portrait') ? 'portrait' : '';
     
@@ -93,7 +93,6 @@ function createCertTemplate(item) {
                     <div class="header-text-only">
                         <img src="khatmklsb.png" class="mosque-name-logo" alt="Masjid Kampung Sungai Lang Baru">
                         <h1 class="title">Sijil Penyertaan</h1>
-                        <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
                         <p class="sub-title">Dengan ini diperakukan bahawa</p>
                     </div>
                 </div>
@@ -104,8 +103,12 @@ function createCertTemplate(item) {
                 </div>
 
                 <div class="program-info-final">
-                    yang telah berlangsung pada <strong>Ramadhan 1447H (28 Feb – 22 Mac 2026)</strong><br>
-                    anjuran Masjid Kampung Sungai Lang Baru.
+                    <span>telah menghadiri</span><br>
+                    <strong style="font-size: 1.2em; color: var(--dark-gold);">DAURAH REMAJA QURANIC 2026</strong><br>
+                    <span>pada</span><br>
+                    <strong>Ramadan 1447 (Tahun 2026)</strong><br>
+                    <span>anjuran</span><br>
+                    <strong>Masjid Kampung Sungai Lang Baru</strong>
                 </div>
 
                 <div class="footer-section">
@@ -174,38 +177,30 @@ function generateAndPreviewBulk() {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 8. Eksekusi Cetakan (KEMASKINI: Stabil & Anti-Blank)
+// 8. Eksekusi Cetakan (Stabil & Anti-Blank)
 function executeFinalPrint() {
     const container = document.getElementById('certificate-container');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     
     if (checked.length === 0) return alert("Sila pilih peserta!");
 
-    // Paparkan status loading
     document.getElementById('status-text').innerText = "Menyusun " + checked.length + " sijil... Sila tunggu.";
 
-    // 1. Bina kandungan pukal
     const content = Array.from(checked).map((cb, index) => {
         let html = createCertTemplate(masterData[cb.value]);
-        // Tambah page-break kecuali untuk sijil terakhir
         if (index < checked.length - 1) {
             html += '<div class="page-break" style="page-break-after: always;"></div>';
         }
         return html;
     }).join('');
 
-    // 2. Masukkan ke dalam container cetakan
     container.innerHTML = content;
-
-    // 3. TUTUP PREVIEW MODAL sebelum cetak (Penting untuk kestabilan)
     closePreview();
 
-    // 4. Beri masa 2.5 saat untuk browser 'render' semua elemen grafik/teks
     setTimeout(() => { 
         window.print(); 
         document.getElementById('status-text').innerText = "Cetakan selesai.";
         
-        // Kosongkan semula container selepas dialog cetak selesai
         setTimeout(() => {
             container.innerHTML = ''; 
         }, 1000);
