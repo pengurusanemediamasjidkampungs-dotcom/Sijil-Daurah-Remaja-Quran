@@ -68,7 +68,8 @@ body {
 }
 
 .logo-center-top {
-    height: 150px; 
+    /* DIKEMASKINI: Menggunakan variable dinamik dari Control Panel */
+    height: var(--logo-size) !important; 
     width: auto;
     object-fit: contain;
     margin-bottom: 15px;
@@ -156,11 +157,11 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-bottom: 25px; /* Jarak dari frame bawah */
+    padding-bottom: 25px; 
 }
 
 .logo-bottom-left-wrapper {
-    flex: 0 0 250px; /* Lebarkan ruang logo untuk keseimbangan */
+    flex: 0 0 250px; 
     display: flex;
     justify-content: center;
     padding-left: 20px;
@@ -177,7 +178,6 @@ body {
     flex: 1;
     display: flex;
     justify-content: center;
-    /* Margin-right separuh dari lebar logo wrapper untuk paksi tengah yang tepat */
     margin-right: 125px; 
 }
 
