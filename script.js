@@ -1,6 +1,6 @@
 /**
  * SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Logik Utama: script.js (Updated with New Layout & Portrait Support)
+ * Logik Utama: script.js (Updated with Stabilized Bulk Print)
  */
 
 let masterData = [];
@@ -81,7 +81,7 @@ function updateOrientation() {
     });
 }
 
-// 5. Template Sijil (KEMASKINI: Layout Baharu - Logo Masjid Atas, Logo Program Kiri Bawah)
+// 5. Template Sijil
 function createCertTemplate(item) {
     const portraitClass = (currentOrientation === 'portrait') ? 'portrait' : '';
     
@@ -174,27 +174,42 @@ function generateAndPreviewBulk() {
     document.getElementById('preview-modal').scrollTop = 0;
 }
 
-// 8. Eksekusi Cetakan
+// 8. Eksekusi Cetakan (KEMASKINI: Stabil & Anti-Blank)
 function executeFinalPrint() {
     const container = document.getElementById('certificate-container');
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     
-    container.innerHTML = Array.from(checked).map((cb, index) => {
+    if (checked.length === 0) return alert("Sila pilih peserta!");
+
+    // Paparkan status loading
+    document.getElementById('status-text').innerText = "Menyusun " + checked.length + " sijil... Sila tunggu.";
+
+    // 1. Bina kandungan pukal
+    const content = Array.from(checked).map((cb, index) => {
         let html = createCertTemplate(masterData[cb.value]);
+        // Tambah page-break kecuali untuk sijil terakhir
         if (index < checked.length - 1) {
-            html += '<div class="page-break"></div>';
+            html += '<div class="page-break" style="page-break-after: always;"></div>';
         }
         return html;
     }).join('');
 
+    // 2. Masukkan ke dalam container cetakan
+    container.innerHTML = content;
+
+    // 3. TUTUP PREVIEW MODAL sebelum cetak (Penting untuk kestabilan)
     closePreview();
-    document.getElementById('status-text').innerText = "Sedang menyediakan dokumen...";
-    
+
+    // 4. Beri masa 2.5 saat untuk browser 'render' semua elemen grafik/teks
     setTimeout(() => { 
         window.print(); 
         document.getElementById('status-text').innerText = "Cetakan selesai.";
-        container.innerHTML = ''; 
-    }, 1000);
+        
+        // Kosongkan semula container selepas dialog cetak selesai
+        setTimeout(() => {
+            container.innerHTML = ''; 
+        }, 1000);
+    }, 2500); 
 }
 
 // 9. Cetak Sijil Tunggal
@@ -208,7 +223,7 @@ function printSingleCert(idx) {
     }, 500);
 }
 
-// 10. Utiliti (Tutup, Tapis, Toggle)
+// 10. Utiliti
 function closePreview() {
     document.getElementById('preview-modal').style.display = 'none';
     document.getElementById('preview-area').innerHTML = ''; 
