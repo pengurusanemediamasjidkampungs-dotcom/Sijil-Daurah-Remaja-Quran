@@ -36,7 +36,7 @@ function renderNameList(data) {
     });
 }
 
-// 3. Template Sijil (KEMASKINI: Tanpa Jadual & Ayat Baharu)
+// 3. Template Sijil (KEMASKINI: Tajuk di Atas & Info di Bawah)
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -51,14 +51,15 @@ function createCertTemplate(item) {
                     <img src="logo_daurahquran.png" class="logo-right" alt="Logo Program">
                 </div>
 
+                <div class="program-name-top">DAURAH REMAJA QURANIC 2026</div>
+
                 <div class="participant-name">${item.nama}</div>
                 <div class="participant-ic">No. K/P: ${item.ic}</div>
 
-                <div class="program-info-new">
+                <div class="program-info-final">
                     yang telah berlangsung sepanjang bulan <strong>Ramadhan 1447H</strong><br>
-                    bermula sesi 1 pada <strong>28 Februari 2026</strong> hingga sesi 8 <strong>22 Mac 2026</strong><br>
-                    setiap hari Sabtu dan Ahad di bawah tajuk:
-                    <span class="program-name-large">DAURAH REMAJA QURANIC 2026</span>
+                    bermula dari sesi 1 pada <strong>28 Februari 2026</strong> sehingga sesi 8 pada <strong>22 Mac 2026</strong><br>
+                    anjuran Masjid Kampung Sungai Lang Baru setiap hari Sabtu dan Ahad.
                 </div>
 
                 <div class="signatures">
