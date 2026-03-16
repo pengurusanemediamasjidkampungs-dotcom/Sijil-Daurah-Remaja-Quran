@@ -28,7 +28,7 @@ body {
     align-items: center;
 }
 
-/* --- REKA BENTUK SIJIL (A4 LANDSCAPE) --- */
+/* --- REKA BENTUK SIJIL (A4 LANDSCAPE - DEFAULT) --- */
 .certificate {
     width: 297mm;
     height: 210mm;
@@ -294,5 +294,32 @@ body {
     #preview-area .certificate {
         transform: none !important;
         margin-bottom: 0 !important;
+    }
+}
+
+/* --- FORMAT PORTRAIT --- */
+.certificate.portrait {
+    width: 210mm;
+    height: 297mm;
+}
+
+.certificate.portrait .content-overlay {
+    padding: 50px; /* Lebih ruang atas/bawah untuk portrait */
+}
+
+/* Laraskan skala pralihat untuk portrait agar muat dalam skrin */
+#preview-area .certificate.portrait {
+    transform: scale(0.4); 
+    margin-bottom: -150mm;
+}
+
+/* CSS Cetakan untuk Portrait */
+@media print {
+    @page { size: auto; margin: 0; }
+    
+    .certificate.portrait {
+        width: 210mm !important;
+        height: 297mm !important;
+        page-break-after: always !important;
     }
 }
