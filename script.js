@@ -36,7 +36,7 @@ function renderNameList(data) {
     });
 }
 
-// 3. Template Sijil (Pusat Kawalan Reka Bentuk)
+// 3. Template Sijil (KEMASKINI: Tanpa Jadual & Ayat Baharu)
 function createCertTemplate(item) {
     return `
         <div class="certificate">
@@ -54,16 +54,12 @@ function createCertTemplate(item) {
                 <div class="participant-name">${item.nama}</div>
                 <div class="participant-ic">No. K/P: ${item.ic}</div>
 
-                <div class="program-info">
-                    Telah berjaya mengikuti <strong>sepanjang sesi</strong> intensif setiap Sabtu & Ahad (8:15 AM - 10:45 AM)<br>
-                    <span class="program-name">DAURAH REMAJA QURAN 2026</span><br>
-                    Sepanjang Bulan Ramadan 1447H
+                <div class="program-info-new">
+                    yang telah berlangsung sepanjang bulan <strong>Ramadhan 1447H</strong><br>
+                    bermula sesi 1 pada <strong>28 Februari 2026</strong> hingga sesi 8 <strong>22 Mac 2026</strong><br>
+                    setiap hari Sabtu dan Ahad di bawah tajuk:
+                    <span class="program-name-large">DAURAH REMAJA QURANIC 2026</span>
                 </div>
-
-                <table class="sessions-grid">
-                    <tr><td>Sesi 1: 28 Feb</td><td>Sesi 2: 1 Mac</td><td>Sesi 3: 7 Mac</td><td>Sesi 4: 8 Mac</td></tr>
-                    <tr><td>Sesi 5: 14 Mac</td><td>Sesi 6: 15 Mac</td><td>Sesi 7: 21 Mac</td><td>Sesi 8: 22 Mac</td></tr>
-                </table>
 
                 <div class="signatures">
                     <div class="sig-wrapper">
@@ -198,5 +194,5 @@ function toggleAll(status) {
     });
 }
 
-// Muat data permulaan
+// Jalankan loadData
 loadData();
