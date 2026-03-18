@@ -5,11 +5,10 @@
  */
 
 let masterData = [];
-let currentOrientation = 'landscape'; // Default landscape untuk sijil
+let currentOrientation = 'portrait'; // DEFAULT SET KE PORTRAIT
 
 /**
  * 1. DATA PEMBIMBING (HARDCODED)
- * Memastikan Aiman, Nuaim, dan Arif sentiasa ada dalam sistem.
  */
 const dataPembimbing = [
     { id: "P1", nama: "MUHAMMAD AIMAN BIN MOHAMAD RAFEE", ic: "960908-10-6031", kumpulan: "PEMBIMBING" },
@@ -27,21 +26,20 @@ async function loadData() {
         if (!res.ok) throw new Error("Gagal mengambil data.json");
         
         const jsonData = await res.json();
-        // Gabungkan data pembimbing di atas sekali
         masterData = [...dataPembimbing, ...jsonData];
         
         renderNameList(masterData);
         
-        // TETAPKAN NILAI DEFAULT PADA CSS VARIABLES
+        // DEFAULT CSS VARIABLES
         document.documentElement.style.setProperty('--logo-size', '250px');
         document.documentElement.style.setProperty('--logo-program-size', '150px');
         document.documentElement.style.setProperty('--name-size', '28px');
         document.documentElement.style.setProperty('--content-spacing', '0px');
         
-        if(statusEl) statusEl.innerText = `${masterData.length} data (termasuk pembimbing) sedia ada.`;
+        if(statusEl) statusEl.innerText = `${masterData.length} data sedia ada.`;
     } catch (e) {
         console.error(e);
-        if(statusEl) statusEl.innerText = "Ralat: Pastikan fail data.json wujud dalam folder!";
+        if(statusEl) statusEl.innerText = "Ralat: Pastikan fail data.json wujud!";
     }
 }
 
@@ -95,12 +93,15 @@ function injectControlPanel() {
 }
 
 /**
- * 4. LOGIK MODAL & PREVIEW
+ * 4. LOGIK MODAL & PREVIEW (PESERTA & PEMBIMBING)
  */
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
     if(!masterData[idx]) return;
+
+    // SYNC ORIENTASI TERKINI SEBELUM RENDER
+    currentOrientation = document.getElementById('orientation-selector').value;
 
     area.innerHTML = injectControlPanel() + `
         <div class="preview-item-container">
@@ -114,49 +115,43 @@ function showPreview(idx) {
     modal.style.display = 'block';
 }
 
+function generateSijilPembimbing() {
+    const area = document.getElementById('preview-area');
+    const modal = document.getElementById('preview-modal');
+
+    // SYNC ORIENTASI TERKINI
+    currentOrientation = document.getElementById('orientation-selector').value;
+
+    let certsContent = dataPembimbing.map((item) => `
+        <div class="preview-item-container" style="margin-bottom:50px;">
+            ${createCertTemplate(item, currentOrientation)}
+            <hr class="preview-divider no-print">
+        </div>
+    `).join('');
+
+    area.innerHTML = injectControlPanel() + `
+        <div class="no-print" style="text-align:center; margin-bottom:20px;">
+            <button onclick="executeFinalPrintWithData('PEMBIMBING')" class="action-btn" style="background:#d4af37; color:black; padding:15px 40px;">🖨️ CETAK SEMUA PEMBIMBING</button>
+        </div>
+    ` + certsContent;
+
+    modal.style.display = 'block';
+    modal.scrollTop = 0;
+}
+
 /**
  * 5. FUNGSI BULK & AUTOMATION
  */
-async function hantarSemuaPilihan() {
-    const checked = document.querySelectorAll('.cert-checkbox:checked');
-    if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
-
-    const sahkan = confirm(`Hantar ${checked.length} sijil secara automatik ke Telegram?`);
-    if (!sahkan) return;
-
-    const statusText = document.getElementById('status-text');
-    const btnAsal = event.target;
-    btnAsal.disabled = true;
-    btnAsal.innerHTML = "⌛ SEDANG MEMPROSES...";
-
-    for (let i = 0; i < checked.length; i++) {
-        const idx = checked[i].value;
-        const peserta = masterData[idx];
-
-        if(statusText) statusText.innerText = `⏳ Memproses (${i + 1}/${checked.length}): ${peserta.nama}`;
-
-        try {
-            // Kita panggil fungsi dari print-engine.js
-            await hantarSijilKeTelegram(peserta, currentOrientation);
-            // Beri ruang 2 saat untuk mengelakkan Telegram API limit
-            await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (err) {
-            console.error(`Gagal hantar: ${peserta.nama}`, err);
-        }
-    }
-
-    if(statusText) statusText.innerText = `✅ Selesai! ${checked.length} sijil berjaya diproses.`;
-    btnAsal.disabled = false;
-    btnAsal.innerHTML = "🚀 AUTO-RUN KE TELEGRAM";
-    alert("Proses Bulk Selesai!");
-}
-
 function generateAndPreviewBulk() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
+    
+    // SYNC ORIENTASI TERKINI
+    currentOrientation = document.getElementById('orientation-selector').value;
+    
     const selectedData = Array.from(checked).map(cb => masterData[cb.value]);
 
     let certsContent = selectedData.map((item) => `
@@ -175,29 +170,69 @@ function generateAndPreviewBulk() {
     modal.style.display = 'block';
 }
 
-// Fungsi helper untuk bulk print
-function executeFinalPrintWithData() {
+async function hantarSemuaPilihan() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
-    const selectedData = Array.from(checked).map(cb => masterData[cb.value]);
-    executeFinalPrint(selectedData, currentOrientation);
+    if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
+
+    const sahkan = confirm(`Hantar ${checked.length} sijil secara automatik ke Telegram?`);
+    if (!sahkan) return;
+
+    // SYNC ORIENTASI
+    currentOrientation = document.getElementById('orientation-selector').value;
+
+    const statusText = document.getElementById('status-text');
+    const btnAsal = event.target;
+    btnAsal.disabled = true;
+    btnAsal.innerHTML = "⌛ SEDANG MEMPROSES...";
+
+    for (let i = 0; i < checked.length; i++) {
+        const idx = checked[i].value;
+        const peserta = masterData[idx];
+
+        if(statusText) statusText.innerText = `⏳ Memproses (${i + 1}/${checked.length}): ${peserta.nama}`;
+
+        try {
+            await hantarSijilKeTelegram(peserta, currentOrientation);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (err) {
+            console.error(`Gagal hantar: ${peserta.nama}`, err);
+        }
+    }
+
+    if(statusText) statusText.innerText = `✅ Selesai! ${checked.length} sijil diproses.`;
+    btnAsal.disabled = false;
+    btnAsal.innerHTML = "🚀 AUTO-RUN KE TELEGRAM";
+    alert("Proses Bulk Selesai!");
 }
 
 /**
  * 6. UTILITI & UI HELPER
  */
+function executeFinalPrintWithData(type = 'SELECTED') {
+    let dataToPrint = [];
+    if(type === 'PEMBIMBING') {
+        dataToPrint = dataPembimbing;
+    } else {
+        const checked = document.querySelectorAll('.cert-checkbox:checked');
+        dataToPrint = Array.from(checked).map(cb => masterData[cb.value]);
+    }
+    
+    currentOrientation = document.getElementById('orientation-selector').value;
+    executeFinalPrint(dataToPrint, currentOrientation);
+}
+
 function printSingleCertByIndex(idx) {
+    currentOrientation = document.getElementById('orientation-selector').value;
     if(masterData[idx]) printSingleCert(masterData[idx], currentOrientation);
 }
 
 function hantarKeTelegramByIndex(idx) {
-    if(masterData[idx]) {
-        hantarSijilKeTelegram(masterData[idx], currentOrientation);
-    }
+    currentOrientation = document.getElementById('orientation-selector').value;
+    if(masterData[idx]) hantarSijilKeTelegram(masterData[idx], currentOrientation);
 }
 
 function updateOrientation() {
     currentOrientation = document.getElementById('orientation-selector').value;
-    // Update live preview jika modal terbuka
     const certs = document.querySelectorAll('.certificate');
     certs.forEach(c => {
         if(currentOrientation === 'portrait') c.classList.add('portrait');
@@ -227,5 +262,4 @@ function closePreview() {
     document.getElementById('preview-area').innerHTML = ''; 
 }
 
-// Mula Muat Data
 loadData();
