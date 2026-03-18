@@ -7,12 +7,10 @@
     
     <link rel="stylesheet" href="style.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     
     <style>
-        /* GAYA UI KHAS UNTUK PANEL KAWALAN */
+        /* GAYA UI KHAS PANEL KAWALAN */
         @media screen {
             .control-panel {
                 position: sticky; 
@@ -58,7 +56,7 @@
             }
             .name-item:hover {
                 border-color: #d4af37;
-                background: #fffdf0;
+                background: #fffcf0;
             }
             .preview-link { 
                 color: #2c3e50; 
@@ -75,12 +73,6 @@
                 border-radius: 3px; 
                 cursor: pointer; 
             }
-
-            /* Tombol Aksi List */
-            .btn-quick-print { background: #27ae60; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
-            .btn-quick-telegram { background: #0088cc; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
-
-            /* BUTANG PREMIUM PEMBIMBING */
             .btn-pembimbing {
                 background: linear-gradient(135deg, #d4af37 0%, #996515 100%);
                 color: white;
@@ -90,16 +82,14 @@
                 font-weight: bold;
                 cursor: pointer;
                 box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-                transition: transform 0.2s, box-shadow 0.2s;
+                transition: transform 0.2s;
                 display: flex;
                 align-items: center;
                 gap: 8px;
             }
             .btn-pembimbing:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
             }
-
             .action-btn { 
                 color: white; 
                 border: none; 
@@ -121,7 +111,6 @@
                 font-weight: bold; 
                 z-index: 10001;
             }
-            
             .preview-tag {
                 background: #d4af37;
                 color: white;
@@ -131,15 +120,6 @@
                 font-weight: bold;
                 margin-bottom: 20px;
                 display: inline-block;
-            }
-
-            .preview-footer {
-                margin-top: 20px;
-                padding: 20px;
-                border-top: 2px solid #ddd;
-                width: 100%;
-                background: #f9f9f9;
-                text-align: center;
             }
         }
     </style>
@@ -187,7 +167,7 @@
                 👁️ PREVIEW SEMUA PILIHAN
             </button>
 
-            <button class="action-btn" onclick="hantarSemuaPilihan()" style="background: #e67e22;">
+            <button class="action-btn btn-bulk-telegram" onclick="hantarSemuaPilihan()" style="background: #e67e22;">
                 🚀 AUTO-RUN KE TELEGRAM
             </button>
         </div>
@@ -196,7 +176,7 @@
     </div>
 
     <div id="preview-modal" class="no-print" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; overflow-y:auto;">
-        <div class="modal-content" style="background:white; width:95%; max-width:1000px; margin:20px auto; padding:20px; border-radius:12px; position:relative;">
+        <div class="modal-content" style="background:white; width:95%; max-width:1100px; margin:20px auto; padding:20px; border-radius:12px; position:relative;">
             <span class="close-btn" onclick="closePreview()">&times;</span>
             <div style="text-align:center;">
                 <div class="preview-tag">DASHBOARD PELARASAN REKA BENTUK</div>
@@ -204,7 +184,7 @@
             
             <div id="preview-area"></div>
 
-            <div class="preview-footer no-print">
+            <div class="preview-footer no-print" style="margin-top:20px; padding:20px; border-top:2px solid #eee; text-align:center; background:#f9f9f9;">
                 <p style="margin-bottom: 15px; color: #444; font-weight: 600;">
                     Semak ejaan dan susun atur. Gunakan slider di atas untuk pelarasan pantas.
                 </p>
