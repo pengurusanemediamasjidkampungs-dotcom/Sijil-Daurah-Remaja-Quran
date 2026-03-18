@@ -1,11 +1,10 @@
 /**
  * PRINT ENGINE - SISTEM PENGURUSAN SIJIL DAURAH 2026
- * Fungsi: Penjana Template, Logik Cetakan Chrome, & Integrasi Telegram
+ * Fungsi: Penjana Template, Logik Cetakan Chrome, & Integrasi API Python
  */
 
 /**
  * 1. Penjana Template Sijil (Logik Dinamik)
- * Membina struktur HTML berdasarkan kumpulan (PEMBIMBING atau PESERTA)
  */
 function createCertTemplate(item, orientation = 'landscape') {
     const portraitClass = (orientation === 'portrait') ? 'portrait' : '';
@@ -64,7 +63,7 @@ function createCertTemplate(item, orientation = 'landscape') {
 }
 
 /**
- * 2. Fungsi Cetakan Pukal (Bulk Print) - Untuk Browser Chrome
+ * 2. Fungsi Cetakan Pukal (Bulk Print) - Chrome
  */
 function executeFinalPrint(selectedData, orientation) {
     const container = document.getElementById('certificate-container');
@@ -85,7 +84,7 @@ function executeFinalPrint(selectedData, orientation) {
     setTimeout(() => { 
         window.print(); 
         setTimeout(() => { container.innerHTML = ''; }, 2000);
-    }, 2000); 
+    }, 1000); 
 }
 
 /**
@@ -104,47 +103,34 @@ function printSingleCert(item, orientation) {
 }
 
 /**
- * 4. Fungsi Integrasi Telegram (Background PDF Generation)
+ * 4. Integrasi Telegram (Melalui Backend app.py)
+ * Versi ini menghantar arahan ke Python, Python hantar PDF ke Telegram.
  */
-async function hantarSijilKeTelegram(item, orientation) {
-    // Sediakan elemen tersembunyi untuk proses rendering PDF
-    const element = document.createElement('div');
-    element.style.position = 'absolute';
-    element.style.left = '-9999px';
-    element.innerHTML = createCertTemplate(item, orientation);
-    document.body.appendChild(element);
-
-    const opt = {
-        margin: 0,
-        filename: `Sijil_${item.nama}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: orientation }
-    };
-
+async function hantarSijilKeTelegram(item) {
+    console.log(`Menghantar arahan ke server untuk: ${item.nama}`);
+    
     try {
-        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-        
-        const formData = new FormData();
-        formData.append('chat_id', 'YOUR_CHAT_ID'); // Masukkan Chat ID anda
-        formData.append('document', pdfBlob, `Sijil_${item.nama.replace(/ /g, '_')}.pdf`);
-        formData.append('caption', `✅ Sijil Daurah 2026\n👤 Nama: ${item.nama}\n📂 Kumpulan: ${item.kumpulan}`);
-
-        const botToken = 'YOUR_BOT_TOKEN'; // Masukkan Token Bot anda
-        
-        const res = await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
+        const res = await fetch('/api/send_telegram', {
             method: 'POST',
-            body: formData
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nama: item.nama,
+                ic: item.ic,
+                kumpulan: item.kumpulan
+            })
         });
 
-        if(res.ok) {
-            console.log(`✅ Berjaya hantar sijil: ${item.nama}`);
+        const result = await res.json();
+
+        if (res.ok) {
+            console.log(`✅ Success: ${result.message}`);
+            return true;
         } else {
-            console.error(`❌ Gagal hantar: ${res.statusText}`);
+            console.error(`❌ Server Error: ${result.message}`);
+            return false;
         }
     } catch (error) {
-        console.error("Ralat PDF/Telegram:", error);
-    } finally {
-        document.body.removeChild(element);
+        console.error("❌ Network Error:", error);
+        return false;
     }
 }
