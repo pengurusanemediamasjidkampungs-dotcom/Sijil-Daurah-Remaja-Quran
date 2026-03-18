@@ -1,45 +1,45 @@
 /**
- * LOGIK UTAMA - script.js (VERSI KEMASKINI PENUH)
+ * LOGIK UTAMA - script.js (KEMASKINI: GABUNG PESERTA & PEMBIMBING)
  * Fokus: Pengurusan Data, UI Control Panel, Integrasi html2pdf, dan Telegram Bot (Bulk)
- * Integrasi: Flask API (app.py) untuk hantaran PDF
  */
 
 let masterData = [];
-let currentOrientation = 'portrait'; 
+let currentOrientation = 'portrait';
 
 /**
- * 1. DATA PEMBIMBING (HARDCODED)
- */
-const dataPembimbing = [
-    { id: "P1", nama: "MUHAMMAD AIMAN BIN MOHAMAD RAFEE", ic: "960908-10-6031", kumpulan: "PEMBIMBING" },
-    { id: "P2", nama: "MUHAMMAD NUAIM BIN MOHD DARHA", ic: "901010-10-6297", kumpulan: "PEMBIMBING" },
-    { id: "P3", nama: "MUHAMMAD AIDIL 'ARIF BIN MOHD DARHA", ic: "970210-10-5511", kumpulan: "PEMBIMBING" }
-];
-
-/**
- * 2. MUAT DATA PESERTA & RENDER
+ * 1. MUAT DATA DARI DUA SUMBER (Peserta & Pembimbing)
  */
 async function loadData() {
-    const statusEl = document.getElementById('status-text');
+    const statusText = document.getElementById('status-text');
     try {
-        const res = await fetch('data.json');
-        if (!res.ok) throw new Error("Gagal mengambil data.json");
-        
-        const jsonData = await res.json();
-        masterData = [...dataPembimbing, ...jsonData];
+        // Ambil data peserta (data.json)
+        const resPeserta = await fetch('data.json');
+        const dataPeserta = await resPeserta.json();
+
+        // Ambil data pembimbing (pembimbing_daurah.json)
+        // Kita tambah field kumpulan "PEMBIMBING" secara automatik jika tiada
+        const resPembimbing = await fetch('pembimbing_daurah.json');
+        const dataPembimbing = await resPembimbing.json();
+        const pembimbingProcessed = dataPembimbing.map(p => ({
+            ...p,
+            kumpulan: p.kumpulan || "PEMBIMBING" 
+        }));
+
+        // Gabungkan kedua-dua array
+        masterData = [...pembimbingProcessed, ...dataPeserta];
         
         renderNameList(masterData);
         
-        // DEFAULT CSS VARIABLES
+        // TETAPKAN NILAI DEFAULT PADA CSS VARIABLES
         document.documentElement.style.setProperty('--logo-size', '250px');
         document.documentElement.style.setProperty('--logo-program-size', '150px');
         document.documentElement.style.setProperty('--name-size', '28px');
         document.documentElement.style.setProperty('--content-spacing', '0px');
         
-        if(statusEl) statusEl.innerText = `${masterData.length} data sedia ada.`;
+        statusText.innerText = `${masterData.length} rekod sedia ada (Termasuk Pembimbing).`;
     } catch (e) {
         console.error(e);
-        if(statusEl) statusEl.innerText = "Ralat: Pastikan fail data.json wujud!";
+        statusText.innerText = "Ralat: Pastikan fail JSON wujud dalam repo!";
     }
 }
 
@@ -48,29 +48,79 @@ function renderNameList(data) {
     if (!listDiv) return;
 
     listDiv.innerHTML = data.map((item, index) => {
-        const isP = item.kumpulan === "PEMBIMBING";
+        // Bezakan warna sikit untuk pembimbing supaya senang nampak
+        const isPembimbing = item.kumpulan === "PEMBIMBING";
+        
         return `
-            <div class="name-item" data-group="${item.kumpulan || 'ALL'}" style="${isP ? 'border-left: 5px solid #d4af37; background: #fffcf0;' : ''}">
-                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                    <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
-                    <label for="user-${index}">
-                        <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();" style="${isP ? 'font-weight:bold; color:#b8860b;' : ''}">
-                            ${item.nama} ${isP ? '⭐' : ''}
-                        </span>
-                        <br><small>${item.ic} | <b>${item.kumpulan}</b></small>
-                    </label>
-                </div>
-                <div class="action-buttons-list" style="display: flex; gap: 5px;">
-                    <button onclick="printSingleCertByIndex(${index})" class="no-print btn-quick-print">🖨️</button>
-                    <button onclick="hantarKeTelegramByIndex(${index})" class="no-print btn-quick-telegram">🚀</button>
-                </div>
+        <div class="name-item" data-group="${item.kumpulan || 'ALL'}" style="${isPembimbing ? 'border-left: 4px solid #d4af37;' : ''}">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                <input type="checkbox" class="cert-checkbox" id="user-${index}" value="${index}" checked>
+                <label for="user-${index}">
+                    <span class="preview-link" onclick="showPreview(${index}); event.preventDefault();">${item.nama}</span>
+                    <br><small>${item.ic} | <b>${item.kumpulan}</b></small>
+                </label>
             </div>
-        `;
-    }).join('');
+            <div class="action-buttons-list" style="display: flex; gap: 5px;">
+                <button onclick="printSingleCertByIndex(${index})" class="no-print btn-quick-print">
+                    🖨️
+                </button>
+                <button onclick="hantarKeTelegramByIndex(${index})" class="no-print btn-quick-telegram">
+                    🚀
+                </button>
+            </div>
+        </div>
+    `}).join('');
 }
 
 /**
- * 3. LIVE CONTROL ENGINE & UI HELPERS
+ * 2. INTEGRASI TELEGRAM BOT (BROWSER-SIDE PDF GENERATION)
+ */
+async function hantarKeTelegram(peserta) {
+    const element = document.querySelector('.certificate');
+    if (!element) return { status: 'error', message: 'Sijil tidak dijumpai!' };
+
+    const opt = {
+        margin: 0,
+        filename: `Sijil_${peserta.nama.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: currentOrientation }
+    };
+
+    try {
+        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+        const formData = new FormData();
+        formData.append('file', pdfBlob, opt.filename);
+        formData.append('nama', peserta.nama);
+
+        const response = await fetch('http://localhost:5000/upload_pdf', {
+            method: 'POST',
+            body: formData 
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+function hantarKeTelegramByIndex(idx) {
+    if(masterData[idx]) {
+        showPreview(idx);
+        setTimeout(async () => {
+            try {
+                const res = await hantarKeTelegram(masterData[idx]);
+                if (res.status === 'success') alert(`✅ Berjaya hantar: ${masterData[idx].nama}`);
+            } catch (e) {
+                alert("⚠️ Gagal menghantar. Pastikan Server Python di Ubuntu sedang aktif.");
+            }
+        }, 1200); 
+    }
+}
+
+/**
+ * 3. LIVE CONTROL ENGINE
  */
 function updateLiveStyle(prop, value) {
     document.documentElement.style.setProperty(`--${prop}`, value + 'px');
@@ -81,12 +131,12 @@ function updateLiveStyle(prop, value) {
 function injectControlPanel() {
     return `
         <div class="control-panel-live no-print">
-            <h4 style="margin:0 0 10px 0; color:#333; border-bottom:2px solid #d4af37;">⚙️ Pelarasan Saiz (Live)</h4>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px;">
-                <div><label>Logo Masjid: <span id="val-logo-size">250px</span></label><input type="range" min="50" max="400" value="250" oninput="updateLiveStyle('logo-size', this.value)"></div>
-                <div><label>Logo Program: <span id="val-logo-program-size">150px</span></label><input type="range" min="50" max="400" value="150" oninput="updateLiveStyle('logo-program-size', this.value)"></div>
-                <div><label>Saiz Nama: <span id="val-name-size">28px</span></label><input type="range" min="10" max="100" value="28" oninput="updateLiveStyle('name-size', this.value)"></div>
-                <div><label>Jarak Teks: <span id="val-content-spacing">0px</span></label><input type="range" min="0" max="100" value="0" oninput="updateLiveStyle('content-spacing', this.value)"></div>
+            <h4 style="margin-top:0; color:#333; border-bottom:2px solid #d4af37; padding-bottom:5px;">Kawalan Kekemasan Sijil (Live)</h4>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                <div><label>Saiz Logo Masjid: <span id="val-logo-size">250px</span></label><input type="range" min="50" max="400" value="250" style="width:100%" oninput="updateLiveStyle('logo-size', this.value)"></div>
+                <div><label>Saiz Logo Program: <span id="val-logo-program-size">150px</span></label><input type="range" min="50" max="400" value="150" style="width:100%" oninput="updateLiveStyle('logo-program-size', this.value)"></div>
+                <div><label>Saiz Nama: <span id="val-name-size">28px</span></label><input type="range" min="10" max="100" value="28" style="width:100%" oninput="updateLiveStyle('name-size', this.value)"></div>
+                <div><label>Jarak Kandungan: <span id="val-content-spacing">0px</span></label><input type="range" min="0" max="100" value="0" style="width:100%" oninput="updateLiveStyle('content-spacing', this.value)"></div>
             </div>
         </div>
     `;
@@ -98,15 +148,12 @@ function injectControlPanel() {
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
-    if(!masterData[idx]) return;
-
-    currentOrientation = document.getElementById('orientation-selector').value;
-
+    
     area.innerHTML = injectControlPanel() + `
         <div class="preview-item-container">
             <div class="no-print" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
-                <button onclick="printSingleCertByIndex(${idx})" class="action-btn" style="background:#27ae60;">🖨️ CETAK SEKARANG</button>
-                <button onclick="hantarKeTelegramByIndex(${idx})" class="action-btn" style="background:#0088cc;">🚀 HANTAR TELEGRAM</button>
+                <button onclick="printSingleCertByIndex(${idx})" class="action-btn" style="background:#27ae60; margin:0;">🖨️ CETAK FIZIKAL</button>
+                <button onclick="hantarKeTelegram(masterData[${idx}])" class="action-btn" style="background:#0088cc; margin:0;">🚀 HANTAR KE TELEGRAM (PDF)</button>
             </div>
             ${createCertTemplate(masterData[idx], currentOrientation)}
         </div>
@@ -114,90 +161,50 @@ function showPreview(idx) {
     modal.style.display = 'block';
 }
 
-/**
- * 5. INTEGRASI TELEGRAM (HUBUNGAN KE app.py)
- */
-async function hantarSijilKeTelegram(peserta) {
-    console.log("Memulakan hantaran ke Telegram untuk:", peserta.nama);
-    
-    try {
-        const response = await fetch('/api/send_telegram', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                nama: peserta.nama,
-                ic: peserta.ic
-            })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            console.log("Berjaya:", result.message);
-            return true;
-        } else {
-            console.error("Gagal:", result.message);
-            alert("Ralat: " + result.message);
-            return false;
-        }
-    } catch (error) {
-        console.error("Ralat Network:", error);
-        alert("Gagal menyambung ke Server Python (app.py). Pastikan server sedang berjalan!");
-        return false;
-    }
-}
-
-// Fungsi Trigger dari butang individu
-function hantarKeTelegramByIndex(idx) {
-    if(masterData[idx]) {
-        hantarSijilKeTelegram(masterData[idx]);
-    }
-}
-
-// Fungsi Trigger Bulk (Hantar Semua Pilihan)
-async function hantarSemuaPilihan() {
+function generateAndPreviewBulk() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
 
-    const sahkan = confirm(`Hantar ${checked.length} sijil secara automatik ke Telegram?`);
-    if (!sahkan) return;
+    const area = document.getElementById('preview-area');
+    const modal = document.getElementById('preview-modal');
+    const selectedData = Array.from(checked).map(cb => masterData[cb.value]);
 
-    const statusText = document.getElementById('status-text');
-    const btnAsal = document.querySelector('.btn-bulk-telegram'); 
-    
-    if(btnAsal) {
-        btnAsal.disabled = true;
-        btnAsal.innerHTML = "⌛ SEDANG MENGHANTAR...";
-    }
+    let certsContent = selectedData.map((item) => {
+        const originalIndex = masterData.indexOf(item);
+        return `
+            <div class="preview-item-container" style="width:100%; text-align:center; margin-bottom:80px; padding:20px; background:#f9f9f9; border-radius:10px;">
+                <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="printSingleCertByIndex(${originalIndex})" style="background:#2ecc71; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">🖨️ CETAK: ${item.nama}</button>
+                    <button onclick="hantarKeTelegram(masterData[${originalIndex}])" style="background:#0088cc; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">🚀 HANTAR TELEGRAM</button>
+                </div>
+                ${createCertTemplate(item, currentOrientation)}
+                <hr class="preview-divider no-print">
+            </div>
+        `;
+    }).join('');
 
-    for (let i = 0; i < checked.length; i++) {
-        const idx = checked[i].value;
-        const peserta = masterData[idx];
-
-        if(statusText) statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
-
-        const sukses = await hantarSijilKeTelegram(peserta);
-        
-        // Delay 1.5 saat antara hantaran supaya tak kena 'spam block' oleh Telegram
-        if(sukses) await new Promise(resolve => setTimeout(resolve, 1500));
-    }
-
-    if(statusText) statusText.innerText = `✅ Selesai! ${checked.length} sijil telah diproses.`;
-    if(btnAsal) {
-        btnAsal.disabled = false;
-        btnAsal.innerHTML = "🚀 AUTO-RUN KE TELEGRAM";
-    }
-    alert("Proses Bulk Selesai!");
+    area.innerHTML = injectControlPanel() + certsContent;
+    modal.style.display = 'block';
 }
 
 /**
- * 6. FUNGSI CETAK & UTILITI LAIN
+ * 5. FUNGSI HELPER CETAKAN
  */
 function printSingleCertByIndex(idx) {
-    currentOrientation = document.getElementById('orientation-selector').value;
     if(masterData[idx]) printSingleCert(masterData[idx], currentOrientation);
+}
+
+/**
+ * 6. UTILITI UI
+ */
+function updateOrientation() {
+    currentOrientation = document.getElementById('orientation-selector').value;
+    const modal = document.getElementById('preview-modal');
+    if (modal.style.display === 'block') {
+        document.querySelectorAll('.certificate').forEach(c => {
+            currentOrientation === 'portrait' ? c.classList.add('portrait') : c.classList.remove('portrait');
+        });
+    }
 }
 
 function filterData() {
@@ -206,14 +213,14 @@ function filterData() {
         const itemGroup = item.getAttribute('data-group');
         const isMatch = (group === "ALL" || itemGroup === group);
         item.style.display = isMatch ? "flex" : "none";
+        // Hanya untick jika tidak match
+        if(!isMatch) item.querySelector('input').checked = false;
     });
 }
 
 function toggleAll(status) {
     document.querySelectorAll('.name-item').forEach(item => {
-        if(item.style.display !== "none") {
-            item.querySelector('.cert-checkbox').checked = status;
-        }
+        if(item.style.display !== "none") item.querySelector('.cert-checkbox').checked = status;
     });
 }
 
@@ -222,5 +229,47 @@ function closePreview() {
     document.getElementById('preview-area').innerHTML = ''; 
 }
 
-// Jalankan load data permulaan
+/**
+ * 7. AUTO-RUN BULK TELEGRAM
+ */
+async function hantarSemuaPilihan() {
+    const checked = document.querySelectorAll('.cert-checkbox:checked');
+    if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
+
+    const sahkan = confirm(`Hantar ${checked.length} sijil secara automatik?`);
+    if (!sahkan) return;
+
+    const statusText = document.getElementById('status-text');
+    const btnAsal = event.target;
+    btnAsal.disabled = true;
+    btnAsal.innerText = "⌛ SEDANG DIPROSES...";
+
+    for (let i = 0; i < checked.length; i++) {
+        const idx = checked[i].value;
+        const peserta = masterData[idx];
+
+        statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
+
+        try {
+            showPreview(idx);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            const res = await hantarKeTelegram(peserta);
+            
+            if(res.status === 'success') {
+                console.log(`Berjaya: ${peserta.nama}`);
+            } else {
+                console.error(`Ralat server untuk ${peserta.nama}: ${res.message}`);
+            }
+        } catch (err) {
+            console.error(`Gagal teknikal: ${peserta.nama}`, err);
+        }
+    }
+
+    statusText.innerText = `✅ Selesai! ${checked.length} sijil dihantar.`;
+    btnAsal.disabled = false;
+    btnAsal.innerText = "🚀 AUTO-RUN KE TELEGRAM";
+    alert("Proses Bulk Selesai. Sila semak Bot Telegram anda.");
+}
+
+// Inisialisasi
 loadData();
