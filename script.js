@@ -1,22 +1,20 @@
 /**
- * LOGIK UTAMA - script.js (VERSI LENGKAP: PESERTA + PEMBIMBING + ANTI-NAMA-SAMA)
+ * LOGIK UTAMA - script.js (VERSI STABIL: PESERTA + PEMBIMBING + ANTI-PAGE-KOSONG)
  * Fokus: Pengurusan Data, UI Control Panel, Integrasi html2pdf, dan Telegram Bot (Bulk)
  */
 
 let masterData = [];
-let currentOrientation = 'portrait'; // Ikut default yang awak nak
+let currentOrientation = 'portrait'; 
 
 /**
- * 1. MUAT DATA DARI DUA SUMBER (INI FUNGSI YANG HILANG TADI)
+ * 1. MUAT DATA DARI DUA SUMBER
  */
 async function loadData() {
     const statusText = document.getElementById('status-text');
     try {
-        // Ambil data peserta (data.json)
         const resPeserta = await fetch('data.json');
         const dataPeserta = await resPeserta.json();
 
-        // Ambil data pembimbing (pembimbing_daurah.json)
         const resPembimbing = await fetch('pembimbing_daurah.json');
         const dataPembimbing = await resPembimbing.json();
         
@@ -25,12 +23,10 @@ async function loadData() {
             kumpulan: p.kumpulan || "PEMBIMBING" 
         }));
 
-        // Gabungkan kedua-dua array (Pembimbing di atas)
         masterData = [...pembimbingProcessed, ...dataPeserta];
-        
         renderNameList(masterData);
         
-        // 2. TETAPKAN NILAI DEFAULT PADA CSS VARIABLES
+        // DEFAULT VALUES (Apple-inspired UI scale)
         document.documentElement.style.setProperty('--logo-size', '250px');
         document.documentElement.style.setProperty('--logo-program-size', '150px');
         document.documentElement.style.setProperty('--name-size', '28px');
@@ -49,7 +45,6 @@ function renderNameList(data) {
 
     listDiv.innerHTML = data.map((item, index) => {
         const isPembimbing = item.kumpulan === "PEMBIMBING";
-        
         return `
         <div class="name-item" data-group="${item.kumpulan || 'ALL'}" style="${isPembimbing ? 'border-left: 4px solid #d4af37;' : ''}">
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
@@ -68,18 +63,25 @@ function renderNameList(data) {
 }
 
 /**
- * 2. INTEGRASI TELEGRAM BOT (BROWSER-SIDE PDF GENERATION)
+ * 2. INTEGRASI TELEGRAM BOT (FIXED: ANTI-PAGE-KOSONG)
  */
 async function hantarKeTelegram(peserta) {
     const element = document.querySelector('.certificate');
     if (!element) return { status: 'error', message: 'Sijil tidak dijumpai!' };
 
     const opt = {
-        margin: 0,
+        margin: [0, 0, 0, 0], // Top, Left, Bottom, Right (Fix page kosong)
         filename: `Sijil_${peserta.nama.replace(/\s+/g, '_')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: currentOrientation }
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false, 
+            letterRendering: true,
+            scrollY: 0 
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: currentOrientation, compress: true },
+        pagebreak: { mode: 'avoid-all' } // Elakkan page kedua kosong
     };
 
     try {
@@ -92,7 +94,6 @@ async function hantarKeTelegram(peserta) {
             method: 'POST',
             body: formData 
         });
-
         return await response.json();
     } catch (error) {
         console.error(error);
@@ -108,7 +109,7 @@ function hantarKeTelegramByIndex(idx) {
                 const res = await hantarKeTelegram(masterData[idx]);
                 if (res.status === 'success') alert(`✅ Berjaya hantar: ${masterData[idx].nama}`);
             } catch (e) {
-                alert("⚠️ Gagal menghantar server Python.");
+                alert("⚠️ Gagal! Pastikan Server Python aktif.");
             }
         }, 1200); 
     }
@@ -138,12 +139,11 @@ function injectControlPanel() {
 }
 
 /**
- * 4. LOGIK MODAL & PREVIEW (SINGLE & BULK)
+ * 4. LOGIK MODAL & PREVIEW
  */
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
-    
     area.innerHTML = injectControlPanel() + `
         <div class="preview-item-container">
             <div class="no-print" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
@@ -174,8 +174,7 @@ function generateAndPreviewBulk() {
                 </div>
                 ${createCertTemplate(item, currentOrientation)}
                 <hr class="preview-divider no-print">
-            </div>
-        `;
+            </div>`;
     }).join('');
 
     area.innerHTML = injectControlPanel() + certsContent;
@@ -183,11 +182,9 @@ function generateAndPreviewBulk() {
 }
 
 /**
- * 5. FUNGSI HELPER
+ * 5. FUNGSI HELPER & UI
  */
-function printSingleCertByIndex(idx) {
-    if(masterData[idx]) printSingleCert(masterData[idx], currentOrientation);
-}
+function printSingleCertByIndex(idx) { if(masterData[idx]) printSingleCert(masterData[idx], currentOrientation); }
 
 function updateOrientation() {
     currentOrientation = document.getElementById('orientation-selector').value;
@@ -202,8 +199,7 @@ function updateOrientation() {
 function filterData() {
     const group = document.getElementById('group-filter').value;
     document.querySelectorAll('.name-item').forEach(item => {
-        const itemGroup = item.getAttribute('data-group');
-        const isMatch = (group === "ALL" || itemGroup === group);
+        const isMatch = (group === "ALL" || item.getAttribute('data-group') === group);
         item.style.display = isMatch ? "flex" : "none";
     });
 }
@@ -214,18 +210,16 @@ function toggleAll(status) {
     });
 }
 
-function closePreview() {
-    document.getElementById('preview-modal').style.display = 'none';
-}
+function closePreview() { document.getElementById('preview-modal').style.display = 'none'; }
 
 /**
- * 7. AUTO-RUN BULK (ANTI-NAMA-SAMA DENGAN 2 SAAT DELAY)
+ * 6. AUTO-RUN BULK (ANTI-NAMA-SAMA + TAPIS PILIHAN SAHAJA)
  */
 async function hantarSemuaPilihan() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     if (checked.length === 0) return alert("Pilih sekurang-kurangnya satu nama!");
 
-    if (!confirm(`Hantar ${checked.length} sijil secara automatik?`)) return;
+    if (!confirm(`Hantar ${checked.length} sijil pilihan sahaja?`)) return;
 
     const statusText = document.getElementById('status-text');
     const btnAsal = event.target;
@@ -237,10 +231,9 @@ async function hantarSemuaPilihan() {
         const peserta = masterData[idx];
 
         statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
-
-        showPreview(idx);
-        // Delay 2 saat untuk render unik
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        showPreview(idx); // Paksa render DOM unik
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Delay 2 saat
 
         try {
             await hantarKeTelegram(peserta);
@@ -249,7 +242,7 @@ async function hantarSemuaPilihan() {
         }
     }
 
-    statusText.innerText = `✅ Selesai menghantar ${checked.length} sijil!`;
+    statusText.innerText = `✅ Selesai! ${checked.length} sijil unik dihantar.`;
     btnAsal.disabled = false;
     btnAsal.innerText = "🚀 AUTO-RUN KE TELEGRAM";
 }
