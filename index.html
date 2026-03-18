@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     
     <style>
-        /* Gaya tambahan untuk susun atur panel kawalan (Hanya untuk paparan skrin) */
+        /* GAYA UI KHAS UNTUK PANEL KAWALAN */
         @media screen {
             .control-panel {
                 position: sticky; 
@@ -66,10 +66,6 @@
                 text-decoration: none; 
                 font-weight: 700; 
             }
-            .preview-link:hover {
-                color: #996515;
-                text-decoration: underline;
-            }
             .btn-small { 
                 padding: 5px 10px; 
                 font-size: 12px; 
@@ -80,43 +76,37 @@
                 cursor: pointer; 
             }
 
-            /* Gaya Butang Aksi dalam Senarai */
-            .action-group-list {
+            /* Tombol Aksi List */
+            .btn-quick-print { background: #27ae60; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+            .btn-quick-telegram { background: #0088cc; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+
+            /* BUTANG PREMIUM PEMBIMBING (Apple-Style) */
+            .btn-pembimbing {
+                background: linear-gradient(135deg, #d4af37 0%, #996515 100%);
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 50px;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+                transition: transform 0.2s, box-shadow 0.2s;
                 display: flex;
-                gap: 5px;
+                align-items: center;
+                gap: 8px;
             }
-            .btn-quick-print {
-                background: #27ae60;
-                color: white;
-                border: none;
-                padding: 6px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 10px;
-                font-weight: bold;
-                transition: 0.3s;
+            .btn-pembimbing:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
             }
-            .btn-quick-telegram {
-                background: #0088cc;
-                color: white;
-                border: none;
-                padding: 6px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 10px;
-                font-weight: bold;
-                transition: 0.3s;
-            }
-            .btn-quick-print:hover { background: #219150; }
-            .btn-quick-telegram:hover { background: #0077b5; }
 
             .action-btn { 
                 color: white; 
                 border: none; 
                 padding: 12px 30px; 
-                font-size: 18px; 
+                font-size: 16px; 
                 font-weight: bold; 
-                border-radius: 5px; 
+                border-radius: 8px; 
                 cursor: pointer; 
                 transition: 0.3s; 
                 margin-top: 15px; 
@@ -126,12 +116,22 @@
                 top: 10px; 
                 right: 20px; 
                 color: #333; 
-                font-size: 28px; 
+                font-size: 32px; 
                 cursor: pointer; 
                 font-weight: bold; 
                 z-index: 10001;
             }
             
+            .preview-tag {
+                background: #d4af37;
+                color: white;
+                padding: 5px 20px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+
             .preview-footer {
                 margin-top: 20px;
                 padding: 20px;
@@ -139,15 +139,6 @@
                 width: 100%;
                 background: #f9f9f9;
                 text-align: center;
-                border-radius: 0 0 12px 12px;
-            }
-
-            #preview-area {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 20px;
             }
         }
     </style>
@@ -155,7 +146,13 @@
 <body>
 
     <div class="no-print control-panel">
-        <h2 style="margin-top:0; font-family: 'Cinzel', serif; color: #996515;">Sistem Cetakan Sijil Daurah 2026</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 20px auto;">
+            <h2 style="margin:0; font-family: 'Cinzel', serif; color: #996515;">Sistem Cetakan Sijil Daurah 2026</h2>
+            
+            <button class="btn-pembimbing" onclick="generateSijilPembimbing()">
+                👑 SIJIL PEMBIMBING
+            </button>
+        </div>
         
         <div class="filter-section">
             <div>
@@ -200,22 +197,20 @@
     <div id="preview-modal" class="no-print">
         <div class="modal-content">
             <span class="close-btn" onclick="closePreview()">&times;</span>
-            <div class="preview-tag">PRALIHAT DOKUMEN & PELARASAN REKA BENTUK</div>
+            <div class="preview-tag">DASHBOARD PELARASAN REKA BENTUK</div>
             
             <div id="preview-area"></div>
 
-            <div class="preview-footer">
+            <div class="preview-footer no-print">
                 <p style="margin-bottom: 15px; color: #444; font-weight: 600;">
-                    Sila semak semua ejaan nama dan nombor kad pengenalan sebelum mencetak.
+                    Semak ejaan dan susun atur. Gunakan slider di atas untuk pelarasan pantas.
                 </p>
-                
                 <div style="display: flex; gap: 15px; justify-content: center;">
-                    <button id="modal-confirm-btn" class="action-btn" style="background: #c0392b; width: 350px; margin-top: 0;">
-                        ✅ SAHKAN & CETAK SEKARANG
+                    <button onclick="window.print()" class="action-btn" style="background: #c0392b; width: 300px; margin-top: 0;">
+                        ✅ CETAK SEKARANG
                     </button>
-                    
                     <button onclick="closePreview()" class="action-btn" style="background: #7f8c8d; margin-top: 0;">
-                        BATAL
+                        TUTUP
                     </button>
                 </div>
             </div>
@@ -225,6 +220,7 @@
     <div id="certificate-container"></div>
 
     <script src="print-engine.js"></script>
+    <script src="template.js"></script>
     <script src="script.js"></script>
 
 </body>
