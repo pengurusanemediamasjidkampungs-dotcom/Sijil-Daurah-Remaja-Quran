@@ -49,7 +49,7 @@ function createCertTemplate(item, orientation = 'landscape') {
                     </div>
                     <div class="signatures-wrapper">
                         <div class="sig-box">
-                            <img src="tandatangannazir.png" class="signature-img">
+                            <img src="signature.png" class="signature-img" alt="Tandatangan Nazir">
                             <div class="sig-line single-sig">
                                 <strong>( NAZIR MASJID )</strong><br>
                                 Masjid Kampung Sungai Lang Baru
@@ -73,8 +73,9 @@ function executeFinalPrint(selectedData, orientation) {
 
     const content = selectedData.map((item, index) => {
         let html = createCertTemplate(item, orientation);
+        // Page break hanya jika bukan item terakhir
         if (index < selectedData.length - 1) {
-            html += '<div class="page-break" style="page-break-after: always;"></div>';
+            html += '<div class="page-break" style="page-break-after: always; height: 1px;"></div>';
         }
         return html;
     }).join('');
@@ -103,8 +104,7 @@ function printSingleCert(item, orientation) {
 }
 
 /**
- * 4. Integrasi Telegram (Melalui Backend app.py)
- * Versi ini menghantar arahan ke Python, Python hantar PDF ke Telegram.
+ * 4. Integrasi API Python (Optional Backup)
  */
 async function hantarSijilKeTelegram(item) {
     console.log(`Menghantar arahan ke server untuk: ${item.nama}`);
@@ -121,7 +121,6 @@ async function hantarSijilKeTelegram(item) {
         });
 
         const result = await res.json();
-
         if (res.ok) {
             console.log(`✅ Success: ${result.message}`);
             return true;
