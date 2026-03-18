@@ -60,7 +60,7 @@ body {
     text-align: center;
 }
 
-/* --- HEADER (LOGO MASJID CENTER ATAS) --- */
+/* --- HEADER --- */
 .header-complete-center {
     display: flex;
     flex-direction: column;
@@ -75,14 +75,6 @@ body {
     object-fit: contain;
     margin-bottom: 15px;
     filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
-}
-
-.header-text-only {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
 }
 
 .mosque-name-logo {
@@ -102,19 +94,7 @@ body {
     text-transform: uppercase; 
 }
 
-.sub-title { 
-    font-family: 'Open Sans', sans-serif;
-    font-size: 18px; 
-    margin: 5px 0;
-    font-style: italic;
-}
-
 /* --- MAKLUMAT PESERTA --- */
-.participant-section {
-    width: 100%;
-    text-align: center;
-}
-
 .participant-name {
     font-family: 'Open Sans', sans-serif;
     font-size: var(--name-size) !important;
@@ -138,18 +118,7 @@ body {
     margin-bottom: 15px; 
 }
 
-/* --- TEKS PROGRAM --- */
-.program-info-final {
-    font-family: 'Open Sans', sans-serif;
-    font-size: 17px; 
-    line-height: 1.5; 
-    margin: 15px 0 !important;
-    color: #333;
-    max-width: 85%;
-    display: block;
-}
-
-/* --- FOOTER (LOGO PROGRAM & TANDATANGAN) --- */
+/* --- FOOTER --- */
 .footer-section {
     margin-top: auto;
     width: 100%;
@@ -159,42 +128,9 @@ body {
     padding-bottom: 25px; 
 }
 
-.logo-bottom-left-wrapper {
-    flex: 0 0 250px; 
-    display: flex;
-    justify-content: center;
-    padding-left: 20px;
-}
-
 .logo-program-bottom {
     height: var(--logo-program-size) !important;
     width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
-}
-
-.signatures-wrapper {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    margin-right: 125px; 
-}
-
-.sig-box {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 400px;
-}
-
-.signature-img {
-    height: 100px; 
-    width: auto;
-    position: absolute;
-    bottom: 55px; 
-    pointer-events: none;
-    z-index: 5;
 }
 
 .sig-line.single-sig {
@@ -204,17 +140,14 @@ body {
     font-size: 16px;
     color: #1a1a1a;
     text-align: center;
-    line-height: 1.4;
 }
 
-/* --- PENYELARASAN MODAL PREVIEW --- */
+/* --- MODAL & PREVIEW AREA --- */
 #preview-modal {
     display: none; 
     position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.9);
     z-index: 9999; 
     overflow-y: auto; 
@@ -234,7 +167,7 @@ body {
     align-items: center;
 }
 
-/* --- GAYA BARU: CONTAINER PRALIHAT INDIVIDU --- */
+/* CONTAINER UNTUK SETIAP SIJIL DALAM PREVIEW */
 .preview-item-container {
     background: #f0f0f0;
     padding: 30px;
@@ -247,95 +180,96 @@ body {
     align-items: center;
 }
 
-/* Kawalan Skala Sijil di skrin (bukan waktu cetak) */
+/* Kawalan Skala Sijil di skrin */
 #preview-area .certificate {
-    transform: scale(0.6);
+    transform: scale(0.65); /* Besarkan sikit dari 0.6 untuk nampak jelas di Chrome Ubuntu */
     transform-origin: top center;
-    margin-bottom: -75mm; 
+    margin-bottom: -70mm; 
 }
 
-/* --- FORMAT PORTRAIT --- */
+/* FORMAT PORTRAIT */
 .certificate.portrait {
     width: 210mm;
     height: 297mm;
 }
 
 #preview-area .certificate.portrait {
-    transform: scale(0.45); 
-    margin-bottom: -150mm;
+    transform: scale(0.48); 
+    margin-bottom: -140mm;
 }
 
-.preview-divider {
-    display: block;
-    width: 80%;
-    margin: 40px auto;
-    border: none;
-    border-top: 2px dashed #aaa;
+/* CONTROL PANEL LIVE */
+.control-panel-live {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-/* --- LOGIK CETAKAN (FINAL) --- */
+/* --- LOGIK CETAKAN --- */
 @media print {
-    @page { size: auto; margin: 0; }
+    @page { size: landscape; margin: 0; }
 
     html, body {
         background: none !important;
         background-color: white !important;
         margin: 0 !important;
         padding: 0 !important;
-        display: block !important;
     }
 
-    /* Sembunyikan semua elemen UI semasa cetak */
     .no-print, 
     .control-panel-live,
-    #preview-modal,
+    #preview-modal-header, /* Jika ada header modal */
     .preview-item-container button,
     .preview-divider,
-    .preview-tag { 
+    .modal-content > button { 
         display: none !important; 
     }
 
-    /* Hilangkan gaya container pralihat supaya sijil bersih */
+    /* Reset kedudukan modal untuk cetakan */
+    #preview-modal {
+        position: static !important;
+        display: block !important;
+        background: white !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .modal-content {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
     .preview-item-container {
         background: transparent !important;
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
-    }
-
-    #certificate-container {
         display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
     }
 
     .certificate {
         display: block !important;
-        position: relative !important;
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
-        
-        /* LOGIK SAFE BORDER: Memaksa border muncul walaupun margin printer terpotong */
-        border: 12mm solid #d4af37 !important; 
-        box-shadow: inset 0 0 0 2px #996515 !important;
-        
+        border: 12mm solid var(--gold) !important; /* Kekalkan border emas waktu print */
         width: 297mm !important; 
         height: 210mm !important;
         page-break-after: always !important;
-        page-break-inside: avoid !important;
-        overflow: hidden !important;
         transform: none !important; 
-        -webkit-print-color-adjust: exact !important;
     }
 
     .certificate.portrait {
         width: 210mm !important;
         height: 297mm !important;
-    }
-
-    .content-overlay {
-        background: var(--paper-white) !important;
     }
 }
