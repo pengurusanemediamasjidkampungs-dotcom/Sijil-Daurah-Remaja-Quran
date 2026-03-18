@@ -80,7 +80,7 @@
             .btn-quick-print { background: #27ae60; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
             .btn-quick-telegram { background: #0088cc; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
 
-            /* BUTANG PREMIUM PEMBIMBING (Apple-Style) */
+            /* BUTANG PREMIUM PEMBIMBING */
             .btn-pembimbing {
                 background: linear-gradient(135deg, #d4af37 0%, #996515 100%);
                 color: white;
@@ -130,6 +130,7 @@
                 font-size: 12px;
                 font-weight: bold;
                 margin-bottom: 20px;
+                display: inline-block;
             }
 
             .preview-footer {
@@ -194,10 +195,12 @@
         <p id="status-text" style="font-size: 14px; font-weight: bold; color: #333; margin-top: 15px;">Memuatkan data...</p>
     </div>
 
-    <div id="preview-modal" class="no-print">
-        <div class="modal-content">
+    <div id="preview-modal" class="no-print" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; overflow-y:auto;">
+        <div class="modal-content" style="background:white; width:95%; max-width:1000px; margin:20px auto; padding:20px; border-radius:12px; position:relative;">
             <span class="close-btn" onclick="closePreview()">&times;</span>
-            <div class="preview-tag">DASHBOARD PELARASAN REKA BENTUK</div>
+            <div style="text-align:center;">
+                <div class="preview-tag">DASHBOARD PELARASAN REKA BENTUK</div>
+            </div>
             
             <div id="preview-area"></div>
 
@@ -220,7 +223,6 @@
     <div id="certificate-container"></div>
 
     <script src="print-engine.js"></script>
-    <script src="template.js"></script>
     <script src="script.js"></script>
 
 </body>
