@@ -2,7 +2,8 @@
 :root {
     --gold: #d4af37;
     --dark-gold: #996515;
-    --paper-white: rgba(255, 253, 240, 0.94);
+    /* TUKAR: Guna putih bersih untuk jimat ink, atau kekalkan paper-white jika mahu sedikit ton */
+    --paper-white: rgba(255, 255, 255, 0); 
     --shadow: rgba(0, 0, 0, 0.2);
     
     /* Variable Dinamik untuk Control Panel */
@@ -29,12 +30,12 @@ body {
     align-items: center;
 }
 
-/* --- REKA BENTUK SIJIL (FIXED: ANTI-PAGE-KOSONG) --- */
+/* --- REKA BENTUK SIJIL (FIXED: ANTI-PAGE-KOSONG & INK SAVER) --- */
 .certificate {
     width: 210mm; /* Default Portrait as requested */
     height: 296mm; /* Kurangkan 1mm dari A4 (297mm) untuk elak page kosong */
-    background-color: #fffdf0;
-    background-image: url('image_24ecda.jpg');
+    background-color: #ffffff; /* TUKAR: Plain white background */
+    background-image: none !important; /* PADAMKAN IMAGE UNTUK JIMAT INK */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -56,9 +57,9 @@ body {
     border: 2px solid var(--gold);
     height: 100%;
     width: 100%;
-    background: var(--paper-white);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: transparent !important; /* TUKAR: Biar nampak warna asal kertas sijil */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -272,7 +273,9 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
-        border: 12mm solid var(--gold) !important; 
+        border: none !important; /* TUKAR: Buang border jika kertas sijil sudah ada border */
+        background-color: white !important;
+        background-image: none !important;
         width: 100% !important; 
         height: 100% !important;
         page-break-after: always !important;
@@ -280,7 +283,8 @@ body {
     }
 
     .content-overlay {
-        background: var(--paper-white) !important;
+        border: none !important; /* TUKAR: Buang border dalam jika mahu kosong sepenuhnya */
+        background: transparent !important;
         height: 100% !important;
     }
 }
