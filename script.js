@@ -1,14 +1,24 @@
 /**
  * LOGIK UTAMA - script.js
  * Fokus: Pengurusan Data, UI Control Panel, Integrasi html2pdf, dan Telegram Bot (Bulk)
+ * Modul Tambahan: Cetakan Khas Pembimbing
  */
 
 let masterData = [];
-// 1. DEFAULT ORIENTASI KE PORTRAIT
 let currentOrientation = 'portrait';
 
 /**
- * 1. MUAT DATA & RENDER
+ * 1. DATA PEMBIMBING (HARDCODED)
+ * Data ini tidak bergantung pada data.json untuk akses pantas.
+ */
+const dataPembimbing = [
+    { nama: "MUHAMMAD AIMAN BIN MOHAMAD RAFEE", ic: "960908-10-6031", kumpulan: "PEMBIMBING" },
+    { nama: "MUHAMMAD NUAIM BIN MOHD DARHA", ic: "901010-10-6297", kumpulan: "PEMBIMBING" },
+    { nama: "MUHAMMAD AIDIL 'ARIF BIN MOHD DARHA", ic: "970210-10-5511", kumpulan: "PEMBIMBING" }
+];
+
+/**
+ * 2. MUAT DATA PESERTA & RENDER
  */
 async function loadData() {
     try {
@@ -17,7 +27,7 @@ async function loadData() {
         masterData = await res.json();
         renderNameList(masterData);
         
-        // 2. TETAPKAN NILAI DEFAULT PADA CSS VARIABLES
+        // TETAPKAN NILAI DEFAULT PADA CSS VARIABLES
         document.documentElement.style.setProperty('--logo-size', '250px');
         document.documentElement.style.setProperty('--logo-program-size', '150px');
         document.documentElement.style.setProperty('--name-size', '28px');
@@ -26,7 +36,8 @@ async function loadData() {
         document.getElementById('status-text').innerText = `${masterData.length} peserta sedia ada.`;
     } catch (e) {
         console.error(e);
-        document.getElementById('status-text').innerText = "Ralat: Pastikan fail data.json wujud!";
+        const statusEl = document.getElementById('status-text');
+        if(statusEl) statusEl.innerText = "Ralat: Pastikan fail data.json wujud!";
     }
 }
 
@@ -56,10 +67,9 @@ function renderNameList(data) {
 }
 
 /**
- * 2. INTEGRASI TELEGRAM BOT (BROWSER-SIDE PDF GENERATION)
+ * 3. INTEGRASI TELEGRAM BOT
  */
 async function hantarKeTelegram(peserta) {
-    // Mencari elemen sijil aktif dalam DOM
     const element = document.querySelector('.certificate');
     if (!element) return { status: 'error', message: 'Sijil tidak dijumpai!' };
 
@@ -99,12 +109,12 @@ function hantarKeTelegramByIndex(idx) {
             } catch (e) {
                 alert("⚠️ Gagal menghantar. Semak console.");
             }
-        }, 1200); // Masa bertenang untuk render tunggal
+        }, 1200);
     }
 }
 
 /**
- * 3. LIVE CONTROL ENGINE
+ * 4. LIVE CONTROL ENGINE
  */
 function updateLiveStyle(prop, value) {
     document.documentElement.style.setProperty(`--${prop}`, value + 'px');
@@ -127,7 +137,7 @@ function injectControlPanel() {
 }
 
 /**
- * 4. LOGIK MODAL & PREVIEW
+ * 5. LOGIK MODAL & PREVIEW (PESERTA & PEMBIMBING)
  */
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
@@ -143,6 +153,32 @@ function showPreview(idx) {
         </div>
     `;
     modal.style.display = 'block';
+}
+
+function generateSijilPembimbing() {
+    const area = document.getElementById('preview-area');
+    const modal = document.getElementById('preview-modal');
+
+    let certsContent = dataPembimbing.map((item) => {
+        return `
+            <div class="preview-item-container" style="width:100%; text-align:center; margin-bottom:80px; padding:20px; background:#fffceb; border: 2px dashed #d4af37; border-radius:10px;">
+                <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+                    <span style="background:#d4af37; color:white; padding:5px 15px; border-radius:20px; font-size:12px;">MOD PEMBIMBING</span>
+                </div>
+                ${createCertTemplate(item, currentOrientation)}
+                <hr class="preview-divider no-print">
+            </div>
+        `;
+    }).join('');
+
+    area.innerHTML = injectControlPanel() + `
+        <div style="text-align:center; margin-bottom:20px;" class="no-print">
+            <button onclick="window.print()" class="action-btn" style="background:#27ae60; padding:15px 40px; font-size:18px;">🖨️ CETAK SEMUA PEMBIMBING</button>
+        </div>
+    ` + certsContent;
+
+    modal.style.display = 'block';
+    modal.scrollTop = 0;
 }
 
 function generateAndPreviewBulk() {
@@ -172,15 +208,12 @@ function generateAndPreviewBulk() {
 }
 
 /**
- * 5. FUNGSI HELPER CETAKAN
+ * 6. UTILITI & HELPER
  */
 function printSingleCertByIndex(idx) {
     if(masterData[idx]) printSingleCert(masterData[idx], currentOrientation);
 }
 
-/**
- * 6. UTILITI UI
- */
 function updateOrientation() {
     currentOrientation = document.getElementById('orientation-selector').value;
     const modal = document.getElementById('preview-modal');
@@ -213,7 +246,7 @@ function closePreview() {
 }
 
 /**
- * 7. AUTO-RUN BULK TELEGRAM (VERSI ANTI-NAMA-SAMA + DEFAULT PORTRAIT)
+ * 7. AUTO-RUN BULK TELEGRAM
  */
 async function hantarSemuaPilihan() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
@@ -231,29 +264,19 @@ async function hantarSemuaPilihan() {
         const idx = checked[i].value;
         const peserta = masterData[idx];
 
-        statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
+        if(statusText) statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
 
         try {
-            // 1. Paksa modal render data peserta semasa (Crucial untuk Anti-Nama-Sama)
             showPreview(idx);
-            
-            // 2. Masa bertenang 1.5 saat untuk pastikan DOM benar-benar update
             await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // 3. Jalankan proses upload
             const res = await hantarKeTelegram(peserta);
-            
-            if(res.status === 'success') {
-                console.log(`Berjaya: ${peserta.nama}`);
-            } else {
-                console.error(`Ralat server untuk ${peserta.nama}: ${res.message}`);
-            }
+            if(res.status === 'success') console.log(`Berjaya: ${peserta.nama}`);
         } catch (err) {
             console.error(`Gagal teknikal: ${peserta.nama}`, err);
         }
     }
 
-    statusText.innerText = `✅ Selesai! ${checked.length} sijil unik dihantar.`;
+    if(statusText) statusText.innerText = `✅ Selesai! ${checked.length} sijil unik dihantar.`;
     btnAsal.disabled = false;
     btnAsal.innerText = "🚀 AUTO-RUN KE TELEGRAM";
     alert("Proses Bulk Selesai. Sila semak Bot Telegram anda.");
