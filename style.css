@@ -60,7 +60,7 @@ body {
     text-align: center;
 }
 
-/* --- HEADER --- */
+/* --- HEADER (LOGO MASJID CENTER ATAS) --- */
 .header-complete-center {
     display: flex;
     flex-direction: column;
@@ -118,7 +118,18 @@ body {
     margin-bottom: 15px; 
 }
 
-/* --- FOOTER --- */
+/* --- TEKS PROGRAM --- */
+.program-info-final {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 17px; 
+    line-height: 1.5; 
+    margin: 15px 0 !important;
+    color: #333;
+    max-width: 85%;
+    display: block;
+}
+
+/* --- FOOTER (LOGO & TANDATANGAN) --- */
 .footer-section {
     margin-top: auto;
     width: 100%;
@@ -128,9 +139,41 @@ body {
     padding-bottom: 25px; 
 }
 
+.logo-bottom-left-wrapper {
+    flex: 0 0 250px; 
+    display: flex;
+    justify-content: center;
+    padding-left: 20px;
+}
+
 .logo-program-bottom {
     height: var(--logo-program-size) !important;
     width: auto;
+    object-fit: contain;
+}
+
+.signatures-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-right: 125px; 
+}
+
+.sig-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+}
+
+.signature-img {
+    height: 100px; 
+    width: auto;
+    position: absolute;
+    bottom: 55px; 
+    pointer-events: none;
+    z-index: 5;
 }
 
 .sig-line.single-sig {
@@ -142,7 +185,7 @@ body {
     text-align: center;
 }
 
-/* --- MODAL & PREVIEW AREA --- */
+/* --- PENYELARASAN MODAL PREVIEW --- */
 #preview-modal {
     display: none; 
     position: fixed; 
@@ -167,7 +210,6 @@ body {
     align-items: center;
 }
 
-/* CONTAINER UNTUK SETIAP SIJIL DALAM PREVIEW */
 .preview-item-container {
     background: #f0f0f0;
     padding: 30px;
@@ -180,14 +222,13 @@ body {
     align-items: center;
 }
 
-/* Kawalan Skala Sijil di skrin */
+/* Skala Pralihat di Skrin */
 #preview-area .certificate {
-    transform: scale(0.65); /* Besarkan sikit dari 0.6 untuk nampak jelas di Chrome Ubuntu */
+    transform: scale(0.65);
     transform-origin: top center;
     margin-bottom: -70mm; 
 }
 
-/* FORMAT PORTRAIT */
 .certificate.portrait {
     width: 210mm;
     height: 297mm;
@@ -198,7 +239,6 @@ body {
     margin-bottom: -140mm;
 }
 
-/* CONTROL PANEL LIVE */
 .control-panel-live {
     background: #ffffff;
     padding: 20px;
@@ -211,9 +251,9 @@ body {
     z-index: 100;
 }
 
-/* --- LOGIK CETAKAN --- */
+/* --- LOGIK CETAKAN (STABIL & BERSIH) --- */
 @media print {
-    @page { size: landscape; margin: 0; }
+    @page { size: auto; margin: 0; }
 
     html, body {
         background: none !important;
@@ -224,28 +264,10 @@ body {
 
     .no-print, 
     .control-panel-live,
-    #preview-modal-header, /* Jika ada header modal */
+    #preview-modal,
     .preview-item-container button,
-    .preview-divider,
-    .modal-content > button { 
+    .preview-divider { 
         display: none !important; 
-    }
-
-    /* Reset kedudukan modal untuk cetakan */
-    #preview-modal {
-        position: static !important;
-        display: block !important;
-        background: white !important;
-        padding: 0 !important;
-        overflow: visible !important;
-    }
-
-    .modal-content {
-        box-shadow: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-        max-width: none !important;
     }
 
     .preview-item-container {
@@ -253,7 +275,6 @@ body {
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        display: block !important;
     }
 
     .certificate {
@@ -261,7 +282,8 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
-        border: 12mm solid var(--gold) !important; /* Kekalkan border emas waktu print */
+        border: 12mm solid var(--gold) !important; 
+        box-shadow: inset 0 0 0 2px var(--dark-gold) !important; /* Safe border effect */
         width: 297mm !important; 
         height: 210mm !important;
         page-break-after: always !important;
@@ -271,5 +293,9 @@ body {
     .certificate.portrait {
         width: 210mm !important;
         height: 297mm !important;
+    }
+
+    .content-overlay {
+        background: var(--paper-white) !important;
     }
 }
