@@ -1,11 +1,11 @@
 /**
- * LOGIK UTAMA - script.js
+ * LOGIK UTAMA - script.js (VERSI KEMASKINI PENUH)
  * Fokus: Pengurusan Data, UI Control Panel, Integrasi html2pdf, dan Telegram Bot (Bulk)
- * Modul Tambahan: Cetakan Khas Pembimbing
+ * Integrasi: Flask API (app.py) untuk hantaran PDF
  */
 
 let masterData = [];
-let currentOrientation = 'portrait'; // DEFAULT SET KE PORTRAIT
+let currentOrientation = 'portrait'; 
 
 /**
  * 1. DATA PEMBIMBING (HARDCODED)
@@ -70,7 +70,7 @@ function renderNameList(data) {
 }
 
 /**
- * 3. LIVE CONTROL ENGINE
+ * 3. LIVE CONTROL ENGINE & UI HELPERS
  */
 function updateLiveStyle(prop, value) {
     document.documentElement.style.setProperty(`--${prop}`, value + 'px');
@@ -93,14 +93,13 @@ function injectControlPanel() {
 }
 
 /**
- * 4. LOGIK MODAL & PREVIEW (PESERTA & PEMBIMBING)
+ * 4. LOGIK MODAL & PREVIEW
  */
 function showPreview(idx) {
     const area = document.getElementById('preview-area');
     const modal = document.getElementById('preview-modal');
     if(!masterData[idx]) return;
 
-    // SYNC ORIENTASI TERKINI SEBELUM RENDER
     currentOrientation = document.getElementById('orientation-selector').value;
 
     area.innerHTML = injectControlPanel() + `
@@ -115,61 +114,49 @@ function showPreview(idx) {
     modal.style.display = 'block';
 }
 
-function generateSijilPembimbing() {
-    const area = document.getElementById('preview-area');
-    const modal = document.getElementById('preview-modal');
-
-    // SYNC ORIENTASI TERKINI
-    currentOrientation = document.getElementById('orientation-selector').value;
-
-    let certsContent = dataPembimbing.map((item) => `
-        <div class="preview-item-container" style="margin-bottom:50px;">
-            ${createCertTemplate(item, currentOrientation)}
-            <hr class="preview-divider no-print">
-        </div>
-    `).join('');
-
-    area.innerHTML = injectControlPanel() + `
-        <div class="no-print" style="text-align:center; margin-bottom:20px;">
-            <button onclick="executeFinalPrintWithData('PEMBIMBING')" class="action-btn" style="background:#d4af37; color:black; padding:15px 40px;">🖨️ CETAK SEMUA PEMBIMBING</button>
-        </div>
-    ` + certsContent;
-
-    modal.style.display = 'block';
-    modal.scrollTop = 0;
-}
-
 /**
- * 5. FUNGSI BULK & AUTOMATION
+ * 5. INTEGRASI TELEGRAM (HUBUNGAN KE app.py)
  */
-function generateAndPreviewBulk() {
-    const checked = document.querySelectorAll('.cert-checkbox:checked');
-    if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
-
-    const area = document.getElementById('preview-area');
-    const modal = document.getElementById('preview-modal');
+async function hantarSijilKeTelegram(peserta) {
+    console.log("Memulakan hantaran ke Telegram untuk:", peserta.nama);
     
-    // SYNC ORIENTASI TERKINI
-    currentOrientation = document.getElementById('orientation-selector').value;
-    
-    const selectedData = Array.from(checked).map(cb => masterData[cb.value]);
+    try {
+        const response = await fetch('/api/send_telegram', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                nama: peserta.nama,
+                ic: peserta.ic
+            })
+        });
 
-    let certsContent = selectedData.map((item) => `
-        <div class="preview-item-container" style="margin-bottom:50px;">
-            ${createCertTemplate(item, currentOrientation)}
-            <hr class="preview-divider no-print">
-        </div>
-    `).join('');
+        const result = await response.json();
 
-    area.innerHTML = injectControlPanel() + `
-        <div class="no-print" style="text-align:center; margin-bottom:20px;">
-            <button onclick="executeFinalPrintWithData()" class="action-btn" style="background:#27ae60; padding:15px 40px;">🖨️ CETAK SEMUA YANG DIPILIH</button>
-        </div>
-    ` + certsContent;
-
-    modal.style.display = 'block';
+        if (response.ok) {
+            console.log("Berjaya:", result.message);
+            return true;
+        } else {
+            console.error("Gagal:", result.message);
+            alert("Ralat: " + result.message);
+            return false;
+        }
+    } catch (error) {
+        console.error("Ralat Network:", error);
+        alert("Gagal menyambung ke Server Python (app.py). Pastikan server sedang berjalan!");
+        return false;
+    }
 }
 
+// Fungsi Trigger dari butang individu
+function hantarKeTelegramByIndex(idx) {
+    if(masterData[idx]) {
+        hantarSijilKeTelegram(masterData[idx]);
+    }
+}
+
+// Fungsi Trigger Bulk (Hantar Semua Pilihan)
 async function hantarSemuaPilihan() {
     const checked = document.querySelectorAll('.cert-checkbox:checked');
     if (checked.length === 0) return alert("Sila pilih sekurang-kurangnya satu nama!");
@@ -177,67 +164,40 @@ async function hantarSemuaPilihan() {
     const sahkan = confirm(`Hantar ${checked.length} sijil secara automatik ke Telegram?`);
     if (!sahkan) return;
 
-    // SYNC ORIENTASI
-    currentOrientation = document.getElementById('orientation-selector').value;
-
     const statusText = document.getElementById('status-text');
-    const btnAsal = event.target;
-    btnAsal.disabled = true;
-    btnAsal.innerHTML = "⌛ SEDANG MEMPROSES...";
+    const btnAsal = document.querySelector('.btn-bulk-telegram'); 
+    
+    if(btnAsal) {
+        btnAsal.disabled = true;
+        btnAsal.innerHTML = "⌛ SEDANG MENGHANTAR...";
+    }
 
     for (let i = 0; i < checked.length; i++) {
         const idx = checked[i].value;
         const peserta = masterData[idx];
 
-        if(statusText) statusText.innerText = `⏳ Memproses (${i + 1}/${checked.length}): ${peserta.nama}`;
+        if(statusText) statusText.innerText = `⏳ Menghantar (${i + 1}/${checked.length}): ${peserta.nama}`;
 
-        try {
-            await hantarSijilKeTelegram(peserta, currentOrientation);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (err) {
-            console.error(`Gagal hantar: ${peserta.nama}`, err);
-        }
+        const sukses = await hantarSijilKeTelegram(peserta);
+        
+        // Delay 1.5 saat antara hantaran supaya tak kena 'spam block' oleh Telegram
+        if(sukses) await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
-    if(statusText) statusText.innerText = `✅ Selesai! ${checked.length} sijil diproses.`;
-    btnAsal.disabled = false;
-    btnAsal.innerHTML = "🚀 AUTO-RUN KE TELEGRAM";
+    if(statusText) statusText.innerText = `✅ Selesai! ${checked.length} sijil telah diproses.`;
+    if(btnAsal) {
+        btnAsal.disabled = false;
+        btnAsal.innerHTML = "🚀 AUTO-RUN KE TELEGRAM";
+    }
     alert("Proses Bulk Selesai!");
 }
 
 /**
- * 6. UTILITI & UI HELPER
+ * 6. FUNGSI CETAK & UTILITI LAIN
  */
-function executeFinalPrintWithData(type = 'SELECTED') {
-    let dataToPrint = [];
-    if(type === 'PEMBIMBING') {
-        dataToPrint = dataPembimbing;
-    } else {
-        const checked = document.querySelectorAll('.cert-checkbox:checked');
-        dataToPrint = Array.from(checked).map(cb => masterData[cb.value]);
-    }
-    
-    currentOrientation = document.getElementById('orientation-selector').value;
-    executeFinalPrint(dataToPrint, currentOrientation);
-}
-
 function printSingleCertByIndex(idx) {
     currentOrientation = document.getElementById('orientation-selector').value;
     if(masterData[idx]) printSingleCert(masterData[idx], currentOrientation);
-}
-
-function hantarKeTelegramByIndex(idx) {
-    currentOrientation = document.getElementById('orientation-selector').value;
-    if(masterData[idx]) hantarSijilKeTelegram(masterData[idx], currentOrientation);
-}
-
-function updateOrientation() {
-    currentOrientation = document.getElementById('orientation-selector').value;
-    const certs = document.querySelectorAll('.certificate');
-    certs.forEach(c => {
-        if(currentOrientation === 'portrait') c.classList.add('portrait');
-        else c.classList.remove('portrait');
-    });
 }
 
 function filterData() {
@@ -262,4 +222,5 @@ function closePreview() {
     document.getElementById('preview-area').innerHTML = ''; 
 }
 
+// Jalankan load data permulaan
 loadData();
